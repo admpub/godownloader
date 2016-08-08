@@ -6,16 +6,14 @@ import (
 	"os"
 	"os/signal"
 	"os/user"
+	"path/filepath"
 	"runtime"
-	"strconv"
 	"syscall"
 )
 
 func getSetPath() string {
 	usr, _ := user.Current()
-	st := strconv.QuoteRune(os.PathSeparator)
-	st = st[1 : len(st)-1]
-	return usr.HomeDir + st + ".godownload"
+	return filepath.Join(usr.HomeDir, ".godownload")
 }
 
 func main() {
