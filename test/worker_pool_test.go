@@ -3,7 +3,7 @@ package dtest
 import (
 	"errors"
 	"fmt"
-	"godownloader/monitor"
+	"github.com/admpub/godownloader/monitor"
 	"log"
 	"math/rand"
 	"testing"

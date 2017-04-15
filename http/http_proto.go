@@ -2,11 +2,12 @@ package httpclient
 
 import (
 	"errors"
-	"godownloader/iotools"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/admpub/godownloader/iotools"
 )
 
 const FlushDiskSize = 1024 * 1024
@@ -86,7 +87,7 @@ func (pd *PartialDownloader) BeforeDownload() error {
 	}
 
 	r.Header.Add("Range", "bytes="+strconv.FormatInt(pd.dp.Pos, 10)+"-"+strconv.FormatInt(pd.dp.To, 10))
-	f,_:=iotools.CreateSafeFile("test")
+	f, _ := iotools.CreateSafeFile("test")
 	r.Write(f)
 	f.Close()
 	resp, err := pd.client.Do(r)

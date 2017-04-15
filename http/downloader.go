@@ -1,8 +1,8 @@
 package httpclient
 
 import (
-	"godownloader/iotools"
-	"godownloader/monitor"
+	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/monitor"
 	"os"
 	"os/user"
 	"strconv"

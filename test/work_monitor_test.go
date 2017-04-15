@@ -1,6 +1,6 @@
 package dtest
 
-import "godownloader/monitor"
+import "github.com/admpub/godownloader/monitor"
 import "testing"
 import (
 	"errors"

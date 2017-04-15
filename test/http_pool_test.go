@@ -1,9 +1,9 @@
 package dtest
 
 import (
-	"godownloader/http"
-	"godownloader/iotools"
-	"godownloader/monitor"
+	"github.com/admpub/godownloader/http"
+	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/monitor"
 	"testing"
 	"time"
 )

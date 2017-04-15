@@ -1,0 +1,5 @@
+GET /issue/netdisk/yunguanjia/BaiduNetdisk_5.5.4.exe HTTP/1.1
+Host: issuecdn.baidupcs.com
+User-Agent: Go-http-client/1.1
+Range: bytes=5696162-11392324
+

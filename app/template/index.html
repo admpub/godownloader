@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+	<title>GO DOWNLOAD</title>
+	<meta name="viewport" content="width=device-width">
+    <link type="text/css" rel="stylesheet" href="/public/css/css.css">
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">GO Downloader</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li>
+							<a data-toggle="modal" data-target="#myModal">Add download</a>
+						</li>
+						<li onclick="RemoveDownload()">
+							<a href="#">Delete download</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Action <b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li onclick="StartDownload()">
+							<a href="#">Start</a>
+						</li>
+						<li onclick="StopDownload()">
+							<a href="#">Stop</a>
+						</li>
+						<li class="divider"></li>
+						<li onclick="StartAllDownload()">
+							<a href="#">Start all</a>
+						</li>
+						<li onclick="StopAllDownload()">
+							<a href="#">Stop all</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a href="#about">About</a>
+				</li>
+			</ul>
+		</div>
+		<!--/.navbar-collapse -->
+	</div>
+</div>
+</P>
+<table id="jqGrid"></table>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog">
+	<div class="modal-dialog">
+		<!-- Modal content-->
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4 class="modal-title">Enter Url</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label class="control-label">Url</label>
+
+					<div class="controls">
+						<input type="text" onchange="OnChangeUrl()" id="url_id" class="form-control" value="http://mirror.yandex.ru/ubuntu-cdimage/releases/15.10/alpha-2/source/wily-src-1.iso">
+					</div>
+					<label class="control-label">Save path</label>
+
+					<div class="controls">
+						<input type="text" id="save_path_id" class="form-control" value="wily-src-1.iso">
+					</div>
+					<label class="control-label">Parts count</label>
+					<select class="form-control" id="part_count_id">
+						<option>1</option>
+						<option>2</option>
+						<option>4</option>
+						<option>8</option>
+						<option>16</option>
+					</select>
+
+					<div class="modal-footer">
+						<a class="btn btn-primary" onclick="AddDownload()" data-dismiss="modal">Start download</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="/public/js/js.js"></script>
+<script type="text/javascript" src="/public/js/sockjs.min.js"></script>
+<script type="text/javascript" src="/public/js/app.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@ package DownloadService
 
 import (
 	"encoding/json"
-	"godownloader/http"
+	"github.com/admpub/godownloader/http"
 	"io/ioutil"
 	"log"
 )

@@ -1,7 +1,7 @@
 package dtest_test
 
 import (
-	"godownloader/http"
+	"github.com/admpub/godownloader/http"
 	"log"
 	"testing"
 	"time"
