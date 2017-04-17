@@ -14,16 +14,16 @@ function UpdateTable() {
             key: true,
             width: 5
         }, {
-            label: 'File Name',
+            label: tableHead.fileName,
             name: 'FileName',
             width: 15
         }, {
-            label: 'Size',
+            label: tableHead.size,
             name: 'Size',
             width: 20,
             formatter: FormatByte
         }, {
-            label: 'Downloaded',
+            label: tableHead.downloaded,
             name: 'Downloaded',
             width: 20,
             formatter: FormatByte
@@ -32,12 +32,12 @@ function UpdateTable() {
             name: 'Progress',
             width: 5
         }, {
-            label: 'Speed',
+            label: tableHead.speed,
             name: 'Speed',
             width: 15,
             formatter: FormatSpeedByte
         }, {
-            label: 'Progress',
+            label: tableHead.progress,
             name: 'Progress',
             formatter: FormatProgressBar
         }],

@@ -57,6 +57,7 @@ type DownloadProgress struct {
 	Speed         int64
 	Lsmt          time.Time
 }
+
 type PartialDownloader struct {
 	dp     DownloadProgress
 	client http.Client
@@ -97,20 +98,24 @@ func (pd *PartialDownloader) BeforeDownload() error {
 	}
 	//check response
 	if resp.StatusCode != 206 {
-		log.Printf("error: file not found or moved status:", resp.StatusCode)
+		log.Println("error: file not found or moved status:", resp.StatusCode)
 		return errors.New("error: file not found or moved")
 	}
 	pd.req = *resp
 	return nil
 }
+
 func (pd *PartialDownloader) AfterStopDownload() error {
 	log.Println("info: try sync file")
 	log.Println(pd.req.Body.Close())
-	return pd.file.Sync()
+	err := pd.file.Sync()
+	return err
 }
+
 func (pd *PartialDownloader) BeforeRun() error {
 	return pd.BeforeDownload()
 }
+
 func (pd *PartialDownloader) AfterStop() error {
 	return pd.AfterStopDownload()
 }
@@ -123,8 +128,8 @@ func (pd *PartialDownloader) messureSpeed(realc int) {
 	} else {
 		pd.dp.BytesInSecond += int64(realc)
 	}
-
 }
+
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//write flush data to disk
 	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
@@ -161,6 +166,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//not full download next segment
 	return false, nil
 }
+
 func (pd *PartialDownloader) DoWork() (bool, error) {
 	return pd.DownloadSergment()
 }

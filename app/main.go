@@ -10,14 +10,27 @@ import (
 	"syscall"
 
 	"github.com/admpub/godownloader/service"
-	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/webx-top/echo/defaults"
 	mw "github.com/webx-top/echo/middleware"
-	bindataLib "github.com/webx-top/echo/middleware/bindata"
+	"github.com/webx-top/echo/middleware/language"
 	"github.com/webx-top/echo/middleware/render"
+	"github.com/webx-top/echo/middleware/render/driver"
 )
 
-var bindata bool
+var (
+	bindata bool
+
+	staticMW  interface{}
+	renderMgr driver.Manager
+	langConf  = &language.Config{
+		Default:      `en`,
+		Fallback:     `zh-cn`,
+		AllList:      []string{`zh-cn`, `en`},
+		RulesPath:    []string{`./data/i18n/rules`},
+		MessagesPath: []string{`./data/i18n/messages`},
+		Reload:       false,
+	}
+)
 
 func getSetPath() string {
 	usr, _ := user.Current()
@@ -45,37 +58,19 @@ func main() {
 
 	defaults.SetDebug(true)
 	defaults.Use(mw.Log(), mw.Recover())
-
 	// 注册静态资源文件
-	if bindata {
-		defaults.Use(bindataLib.Static("/public/", &assetfs.AssetFS{
-			Asset:     Asset,
-			AssetDir:  AssetDir,
-			AssetInfo: AssetInfo,
-			Prefix:    "",
-		}))
-	} else {
-		defaults.Use(mw.Static(&mw.StaticOptions{
-			Path: "/public/",
-			Root: "./public/",
-		}))
-	}
+	defaults.Use(staticMW)
 
+	// 注册模板引擎
 	renderOptions := &render.Config{
 		TmplDir: `./template`,
 		Engine:  `standard`,
 	}
 	renderOptions.ApplyTo(defaults.Default)
-	// 注册模板引擎
-	if bindata {
-		manager := bindataLib.NewTmplManager(&assetfs.AssetFS{
-			Asset:     Asset,
-			AssetDir:  AssetDir,
-			AssetInfo: AssetInfo,
-			Prefix:    "template",
-		})
-		renderOptions.Renderer().SetManager(manager)
+	if renderMgr != nil {
+		renderOptions.Renderer().SetManager(renderMgr)
 	}
-
+	defaults.Use(mw.FuncMap(nil))
+	defaults.Use(language.New(langConf).Middleware())
 	log.Println(gdownsrv.Start(port))
 }

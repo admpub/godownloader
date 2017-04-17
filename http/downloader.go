@@ -1,11 +1,12 @@
 package httpclient
 
 import (
-	"github.com/admpub/godownloader/iotools"
-	"github.com/admpub/godownloader/monitor"
 	"os"
 	"os/user"
 	"strconv"
+
+	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/monitor"
 )
 
 type FileInfo struct {
@@ -13,6 +14,7 @@ type FileInfo struct {
 	FileName string `json:"FileName"`
 	Url      string `json:"Url"`
 }
+
 type Downloader struct {
 	sf *iotools.SafeFile
 	wp *monitor.WorkerPool
@@ -20,25 +22,36 @@ type Downloader struct {
 }
 
 func (dl *Downloader) StopAll() []error {
+	defer dl.sf.Close()
 	return dl.wp.StopAll()
 }
+
 func (dl *Downloader) StartAll() []error {
+	if err := dl.sf.ReOpen(); err != nil {
+		return []error{err}
+	}
 	return dl.wp.StartAll()
 }
+
 func (dl *Downloader) GetProgress() []DownloadProgress {
 	pr := dl.wp.GetAllProgress().([]interface{})
 	re := make([]DownloadProgress, len(pr))
 	for i, val := range pr {
 		re[i] = val.(DownloadProgress)
 	}
+	if dl.wp.Completed() {
+		dl.sf.Close()
+	}
 	return re
 }
+
 func getDown() string {
 	usr, _ := user.Current()
 	st := strconv.QuoteRune(os.PathSeparator)
 	st = st[1 : len(st)-1]
 	return usr.HomeDir + st + "Downloads" + st
 }
+
 func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err error) {
 	c, err := GetSize(url)
 	if err != nil {
@@ -52,7 +65,7 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 		//can't create file on path
 		return nil, err
 	}
-
+	defer sf.Close()
 	if err := sf.Truncate(c); err != nil {
 		//can't truncate file
 		return nil, err
@@ -86,6 +99,7 @@ func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downlo
 		//can't create file on path
 		return nil, err
 	}
+	defer sf.Close()
 	s, err := sf.Stat()
 	if err != nil {
 		return nil, err

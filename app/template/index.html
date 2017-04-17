@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="{{Lang}}">
 <head>
 	<title>GO DOWNLOAD</title>
 	<meta name="viewport" content="width=device-width">
@@ -12,41 +12,41 @@
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 				<span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="#">GO Downloader</a>
+			<a class="navbar-brand" href="#">{{"GO Downloader"|T}}</a>
 		</div>
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{"File"|T}} <b class="caret"></b></a>
 					<ul class="dropdown-menu">
 						<li>
-							<a data-toggle="modal" data-target="#myModal">Add download</a>
+							<a data-toggle="modal" data-target="#myModal">{{"Add download"|T}}</a>
 						</li>
 						<li onclick="RemoveDownload()">
-							<a href="#">Delete download</a>
+							<a href="#">{{"Delete download"|T}}</a>
 						</li>
 					</ul>
 				</li>
 				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Action <b class="caret"></b></a>
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{"Action"|T}} <b class="caret"></b></a>
 					<ul class="dropdown-menu">
 						<li onclick="StartDownload()">
-							<a href="#">Start</a>
+							<a href="#">{{"Start"|T}}</a>
 						</li>
 						<li onclick="StopDownload()">
-							<a href="#">Stop</a>
+							<a href="#">{{"Stop"|T}}</a>
 						</li>
 						<li class="divider"></li>
 						<li onclick="StartAllDownload()">
-							<a href="#">Start all</a>
+							<a href="#">{{"Start all"|T}}</a>
 						</li>
 						<li onclick="StopAllDownload()">
-							<a href="#">Stop all</a>
+							<a href="#">{{"Stop all"|T}}</a>
 						</li>
 					</ul>
 				</li>
 				<li>
-					<a href="#about">About</a>
+					<a href="#about">{{"About"|T}}</a>
 				</li>
 			</ul>
 		</div>
@@ -63,21 +63,19 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal">&times;</button>
-				<h4 class="modal-title">Enter Url</h4>
+				<h4 class="modal-title">{{"Enter Url"|T}}</h4>
 			</div>
 			<div class="modal-body">
 				<div class="form-group">
-					<label class="control-label">Url</label>
-
+					<label class="control-label">{{"Url"|T}}:</label>
 					<div class="controls">
 						<input type="text" onchange="OnChangeUrl()" id="url_id" class="form-control" value="http://mirror.yandex.ru/ubuntu-cdimage/releases/15.10/alpha-2/source/wily-src-1.iso">
 					</div>
-					<label class="control-label">Save path</label>
-
+					<label class="control-label">{{"Save path"|T}}:</label>
 					<div class="controls">
 						<input type="text" id="save_path_id" class="form-control" value="wily-src-1.iso">
 					</div>
-					<label class="control-label">Parts count</label>
+					<label class="control-label">{{"Parts count"|T}}:</label>
 					<select class="form-control" id="part_count_id">
 						<option>1</option>
 						<option>2</option>
@@ -85,9 +83,8 @@
 						<option>8</option>
 						<option>16</option>
 					</select>
-
 					<div class="modal-footer">
-						<a class="btn btn-primary" onclick="AddDownload()" data-dismiss="modal">Start download</a>
+						<a class="btn btn-primary" onclick="AddDownload()" data-dismiss="modal">{{"Start download"|T}}</a>
 					</div>
 				</div>
 			</div>
@@ -95,6 +92,15 @@
 	</div>
 </div>
 
+<script type="text/javascript">
+var tableHead={
+	fileName:'{{"File Name"|T}}',
+	size:'{{"Size"|T}}',
+	downloaded:'{{"Downloaded"|T}}',
+	speed:'{{"Speed"|T}}',
+	progress:'{{"Progress"|T}}'
+};
+</script>
 <script type="text/javascript" src="/public/js/js.js"></script>
 <script type="text/javascript" src="/public/js/sockjs.min.js"></script>
 <script type="text/javascript" src="/public/js/app.js"></script>

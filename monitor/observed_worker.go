@@ -14,6 +14,7 @@ const (
 	Failed
 	Completed
 )
+
 type DiscretWork interface {
 	DoWork() (bool, error)
 	GetProgress() interface{}
@@ -28,15 +29,15 @@ func genUid() string {
 }
 
 type MonitoredWorker struct {
-	lc    sync.Mutex
-	Itw   DiscretWork
-	wgrun sync.WaitGroup
-	guid  string
-	state int
-	chsig chan int
-	stwg  sync.WaitGroup
+	lc     sync.Mutex
+	Itw    DiscretWork
+	wgrun  sync.WaitGroup
+	guid   string
+	state  int
+	chsig  chan int
+	stwg   sync.WaitGroup
+	ondone func()
 }
-
 
 func (mw *MonitoredWorker) wgoroute() {
 	log.Println("info: work start", mw.GetId())
@@ -64,6 +65,9 @@ func (mw *MonitoredWorker) wgoroute() {
 				if isdone {
 					mw.state = Completed
 					log.Println("info: work done")
+					if mw.ondone != nil {
+						mw.ondone()
+					}
 					return
 				}
 			}
@@ -71,9 +75,11 @@ func (mw *MonitoredWorker) wgoroute() {
 		}
 	}
 }
+
 func (mw MonitoredWorker) GetState() int {
 	return mw.state
 }
+
 func (mw *MonitoredWorker) GetId() string {
 	if len(mw.guid) == 0 {
 		mw.guid = genUid()
@@ -81,6 +87,7 @@ func (mw *MonitoredWorker) GetId() string {
 	return mw.guid
 
 }
+
 func (mw *MonitoredWorker) Start() error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()
@@ -117,10 +124,11 @@ func (mw *MonitoredWorker) Stop() error {
 	}
 	return nil
 }
+
 func (mw *MonitoredWorker) Wait() {
 	mw.wgrun.Wait()
 }
+
 func (mw MonitoredWorker) GetProgress() interface{} {
 	return mw.Itw.GetProgress()
-
 }

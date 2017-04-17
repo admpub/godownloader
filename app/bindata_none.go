@@ -5,10 +5,16 @@ package main
 import (
 	"fmt"
 	"os"
+
+	mw "github.com/webx-top/echo/middleware"
 )
 
 func init() {
 	bindata = false
+	staticMW = mw.Static(&mw.StaticOptions{
+		Path: "/public/",
+		Root: "./public/",
+	})
 }
 
 func Asset(name string) ([]byte, error) {
