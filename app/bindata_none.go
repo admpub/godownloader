@@ -11,6 +11,7 @@ import (
 
 func init() {
 	bindata = false
+	langConf.Reload = true
 	staticMW = mw.Static(&mw.StaticOptions{
 		Path: "/public/",
 		Root: "./public/",

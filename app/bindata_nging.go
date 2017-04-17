@@ -11,6 +11,7 @@ import (
 
 func init() {
 	bindata = true
+	langConf.Reload = false
 	staticMW = bindataLib.Static("/public/", &assetfs.AssetFS{
 		Asset:     Asset,
 		AssetDir:  AssetDir,

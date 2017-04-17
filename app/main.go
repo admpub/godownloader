@@ -26,8 +26,8 @@ var (
 		Default:      `en`,
 		Fallback:     `zh-cn`,
 		AllList:      []string{`zh-cn`, `en`},
-		RulesPath:    []string{`./data/i18n/rules`},
-		MessagesPath: []string{`./data/i18n/messages`},
+		RulesPath:    []string{`data/i18n/rules`},
+		MessagesPath: []string{`data/i18n/messages`},
 		Reload:       false,
 	}
 )
@@ -70,7 +70,11 @@ func main() {
 	if renderMgr != nil {
 		renderOptions.Renderer().SetManager(renderMgr)
 	}
-	defaults.Use(mw.FuncMap(nil))
+	defaults.Use(mw.FuncMap(map[string]interface{}{
+		"Languages": func() []string {
+			return langConf.AllList
+		},
+	}))
 	defaults.Use(language.New(langConf).Middleware())
 	log.Println(gdownsrv.Start(port))
 }
