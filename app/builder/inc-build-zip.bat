@@ -1,1 +1,1 @@
-go build -tags "bindata" -o dist/nging_%GOOS%_%GOARCH%%NGINGEX% ..
+go build -tags "bindata" -o dist/GoDownloader_%GOOS%_%GOARCH%%NGINGEX% ..
