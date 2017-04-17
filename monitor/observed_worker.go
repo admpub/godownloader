@@ -42,8 +42,13 @@ type MonitoredWorker struct {
 func (mw *MonitoredWorker) wgoroute() {
 	log.Println("info: work start", mw.GetId())
 	defer func() {
-		log.Print("info: realease work guid ", mw.GetId())
+		log.Print("info: release work guid ", mw.GetId())
 		mw.wgrun.Done()
+		if mw.ondone != nil && mw.state == Completed {
+			mw.ondone()
+		}
+		close(mw.chsig)
+		mw.chsig = nil
 	}()
 
 	for {
@@ -65,9 +70,6 @@ func (mw *MonitoredWorker) wgoroute() {
 				if isdone {
 					mw.state = Completed
 					log.Println("info: work done")
-					if mw.ondone != nil {
-						mw.ondone()
-					}
 					return
 				}
 			}
@@ -114,11 +116,15 @@ func (mw *MonitoredWorker) Stop() error {
 	defer mw.lc.Unlock()
 	if mw.state != Running {
 		return errors.New("error: imposible stop non runing job")
-
 	}
-	mw.chsig <- Stopped
+	if mw.chsig != nil {
+		mw.chsig <- Stopped
+		defer func() {
+			close(mw.chsig)
+			mw.chsig = nil
+		}()
+	}
 	mw.wgrun.Wait()
-	close(mw.chsig)
 	if err := mw.Itw.AfterStop(); err != nil {
 		return err
 	}

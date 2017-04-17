@@ -92,9 +92,7 @@ func (srv *DServ) index(ctx echo.Context) error {
 
 func (srv *DServ) addTask(ctx echo.Context) error {
 	srv.oplock.Lock()
-	defer func() {
-		srv.oplock.Unlock()
-	}()
+	defer srv.oplock.Unlock()
 	var nj NewJob
 	data := ctx.NewData()
 	if err := ctx.MustBind(&nj); err != nil {
@@ -110,9 +108,7 @@ func (srv *DServ) addTask(ctx echo.Context) error {
 
 func (srv *DServ) startTask(ctx echo.Context) error {
 	srv.oplock.Lock()
-	defer func() {
-		srv.oplock.Unlock()
-	}()
+	defer srv.oplock.Unlock()
 	data := ctx.NewData()
 	ind := ctx.Formx(`id`).Int()
 	if !(len(srv.dls) > ind) {
@@ -127,9 +123,7 @@ func (srv *DServ) startTask(ctx echo.Context) error {
 
 func (srv *DServ) stopTask(ctx echo.Context) error {
 	srv.oplock.Lock()
-	defer func() {
-		srv.oplock.Unlock()
-	}()
+	defer srv.oplock.Unlock()
 	data := ctx.NewData()
 	ind := ctx.Formx(`id`).Int()
 	if !(len(srv.dls) > ind) {
@@ -148,9 +142,7 @@ func (srv *DServ) startAllTask(ctx echo.Context) error {
 
 func (srv *DServ) StopAllTask() {
 	srv.oplock.Lock()
-	defer func() {
-		srv.oplock.Unlock()
-	}()
+	defer srv.oplock.Unlock()
 	for _, e := range srv.dls {
 		log.Println("info stopall result:", e.StopAll())
 	}
@@ -158,9 +150,7 @@ func (srv *DServ) StopAllTask() {
 
 func (srv *DServ) StartAllTask() {
 	srv.oplock.Lock()
-	defer func() {
-		srv.oplock.Unlock()
-	}()
+	defer srv.oplock.Unlock()
 	for _, e := range srv.dls {
 		log.Println("info start all result:", e.StartAll())
 	}
@@ -173,14 +163,9 @@ func (srv *DServ) stopAllTask(ctx echo.Context) error {
 
 func (srv *DServ) removeTask(ctx echo.Context) error {
 	srv.oplock.Lock()
-	defer func() {
-		srv.oplock.Unlock()
-	}()
+	defer srv.oplock.Unlock()
 	data := ctx.NewData()
-	var ind int
-	if err := ctx.MustBind(&ind); err != nil {
-		return err
-	}
+	ind := ctx.Formx(`id`).Int()
 	if !(len(srv.dls) > ind) {
 		return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
 	}
@@ -191,6 +176,8 @@ func (srv *DServ) removeTask(ctx echo.Context) error {
 }
 
 func (srv *DServ) progressJson(ctx echo.Context) error {
+	srv.oplock.Lock()
+	defer srv.oplock.Unlock()
 	return ctx.JSON(srv.progress())
 }
 
