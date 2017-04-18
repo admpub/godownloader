@@ -28,3 +28,5 @@ _testmain.go
 *.iml
 /.vscode
 /app/test
+/app/bindata_assetfs.go
+/app/builder/dist

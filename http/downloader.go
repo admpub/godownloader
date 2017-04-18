@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"log"
 	"os"
 	"os/user"
 	"strconv"
@@ -38,9 +39,6 @@ func (dl *Downloader) GetProgress() []DownloadProgress {
 	re := make([]DownloadProgress, len(pr))
 	for i, val := range pr {
 		re[i] = val.(DownloadProgress)
-	}
-	if dl.wp.Completed() {
-		dl.sf.Close()
 	}
 	return re
 }
@@ -84,12 +82,13 @@ func CreateDownloader(url string, fp string, seg int64) (dl *Downloader, err err
 
 	//add to worker pool
 	wp.AppendWork(&mv)
-	d := Downloader{
+	d := &Downloader{
 		sf: sf,
 		wp: wp,
 		Fi: FileInfo{FileName: fp, Size: c, Url: url},
 	}
-	return &d, nil
+	closeSafeFile(d)
+	return d, nil
 }
 
 func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downloader, err error) {
@@ -113,10 +112,18 @@ func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downlo
 		wp.AppendWork(&mv)
 
 	}
-	d := Downloader{
+	d := &Downloader{
 		sf: sf,
 		wp: wp,
 		Fi: FileInfo{FileName: fp, Size: s.Size(), Url: url},
 	}
-	return &d, nil
+	closeSafeFile(d)
+	return d, nil
+}
+
+func closeSafeFile(d *Downloader) {
+	d.wp.AfterComplete(func() {
+		log.Println(`info: close file`, d.Fi.FileName)
+		d.sf.CloseAll()
+	})
 }

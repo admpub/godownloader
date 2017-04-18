@@ -213,8 +213,8 @@ function AddDownload() {
 function RemoveDownload() {
     var grid = $("#jqGrid");
     var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
-    var req = rowKey;
-    reqJSON("/remove_task",req);
+    var req = {id:rowKey};
+    reqForm("/remove_task",req);
 }
 function StartDownload() {
     var grid = $("#jqGrid");
