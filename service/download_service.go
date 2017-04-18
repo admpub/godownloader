@@ -24,6 +24,7 @@ type DJob struct {
 	Downloaded int64
 	Progress   int64
 	Speed      int64
+	State      string
 }
 
 type NewJob struct {
@@ -110,13 +111,15 @@ func (srv *DServ) startTask(ctx echo.Context) error {
 	srv.oplock.Lock()
 	defer srv.oplock.Unlock()
 	data := ctx.NewData()
-	ind := ctx.Formx(`id`).Int()
-	if !(len(srv.dls) > ind) {
-		return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
-	}
+	for _, id := range ctx.FormValues(`id[]`) {
+		ind := ctx.Atop(id).Int()
+		if !(len(srv.dls) > ind) {
+			return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
+		}
 
-	if errs := srv.dls[ind].StartAll(); len(errs) > 0 {
-		return ctx.JSON(data.SetError(errors.New("error: can't start all part")))
+		if errs := srv.dls[ind].StartAll(); len(errs) > 0 {
+			return ctx.JSON(data.SetError(errors.New("error: can't start all part")))
+		}
 	}
 	return ctx.JSON(data)
 }
@@ -125,12 +128,14 @@ func (srv *DServ) stopTask(ctx echo.Context) error {
 	srv.oplock.Lock()
 	defer srv.oplock.Unlock()
 	data := ctx.NewData()
-	ind := ctx.Formx(`id`).Int()
-	if !(len(srv.dls) > ind) {
-		return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
-	}
+	for _, id := range ctx.FormValues(`id[]`) {
+		ind := ctx.Atop(id).Int()
+		if !(len(srv.dls) > ind) {
+			return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
+		}
 
-	srv.dls[ind].StopAll()
+		srv.dls[ind].StopAll()
+	}
 	return ctx.JSON(data)
 }
 
@@ -165,13 +170,15 @@ func (srv *DServ) removeTask(ctx echo.Context) error {
 	srv.oplock.Lock()
 	defer srv.oplock.Unlock()
 	data := ctx.NewData()
-	ind := ctx.Formx(`id`).Int()
-	if !(len(srv.dls) > ind) {
-		return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
-	}
+	for _, id := range ctx.FormValues(`id[]`) {
+		ind := ctx.Atop(id).Int()
+		if !(len(srv.dls) > ind) {
+			return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
+		}
 
-	log.Printf("try stop segment download %v", srv.dls[ind].StopAll())
-	srv.dls = append(srv.dls[:ind], srv.dls[ind+1:]...)
+		log.Printf("try stop segment download %v", srv.dls[ind].StopAll())
+		srv.dls = append(srv.dls[:ind], srv.dls[ind+1:]...)
+	}
 	return ctx.JSON(data)
 }
 
@@ -198,6 +205,7 @@ func (srv *DServ) progress() []DJob {
 			Progress:   (d * 100 / i.Fi.Size),
 			Downloaded: d,
 			Speed:      s,
+			State:      i.State().String(),
 		}
 		jbs = append(jbs, j)
 	}

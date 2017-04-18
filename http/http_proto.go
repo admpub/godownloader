@@ -109,8 +109,8 @@ func (pd *PartialDownloader) BeforeDownload() error {
 
 func (pd *PartialDownloader) AfterStopDownload() error {
 	log.Println("info: try sync file")
-	log.Println(pd.req.Body.Close())
 	err := pd.file.Sync()
+	pd.req.Body.Close()
 	return err
 }
 

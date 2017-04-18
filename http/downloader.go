@@ -43,6 +43,10 @@ func (dl *Downloader) GetProgress() []DownloadProgress {
 	return re
 }
 
+func (dl *Downloader) State() monitor.State {
+	return dl.wp.State()
+}
+
 func getDown() string {
 	usr, _ := user.Current()
 	st := strconv.QuoteRune(os.PathSeparator)

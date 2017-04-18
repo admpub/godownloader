@@ -1,115 +1,70 @@
-function UpdateTable() {
-    $("#jqGrid").jqGrid({
-        url: 'http://' + location.hostname + ':9981/progress.json',
-        mtype: "GET",
-        ajaxSubgridOptions: {
-            async: false
-        },
-        datatype: "json",
-        //datatype : "local",
-        styleUI: 'Bootstrap',
-        colModel: [{
-            label: '#',
-            name: 'Id',
-            key: true,
-            width: 5
-        }, {
-            label: tableHead.fileName,
-            name: 'FileName',
-            width: 15
-        }, {
-            label: tableHead.size,
-            name: 'Size',
-            width: 20,
-            formatter: FormatByte
-        }, {
-            label: tableHead.downloaded,
-            name: 'Downloaded',
-            width: 20,
-            formatter: FormatByte
-        }, {
-            label: '%',
-            name: 'Progress',
-            width: 5
-        }, {
-            label: tableHead.speed,
-            name: 'Speed',
-            width: 15,
-            formatter: FormatSpeedByte
-        }, {
-            label: tableHead.progress,
-            name: 'Progress',
-            formatter: FormatProgressBar
-        }],
-        viewrecords: true,
-        rowNum: 20,
-        pager: "#jqGridPager"
-    });
-}
-
-function FixTable() {
-    $.extend($.jgrid.ajaxOptions, {async: false});
-    $("#jqGrid").setGridWidth($(window).width() - 5);
-    $("#jqGrid").setGridHeight($(window).height());
-    $(window).bind('resize', function() {
-        $("#jqGrid").setGridWidth($(window).width() - 5);
-        $("#jqGrid").setGridHeight($(window).height());
-    });
-}
-function UpdateData() {
-    var grid = $("#jqGrid");
-    var rowKey = grid.jqGrid('getGridParam', "selrow");
-    $("#jqGrid").trigger("reloadGrid");
-    if (rowKey) {
-        $('#jqGrid').jqGrid("resetSelection")
-        $('#jqGrid').jqGrid('setSelection', rowKey);
-    }
-}
-function FormatProgressBar(cellValue, options, rowObject) {
+function FormatProgressBar(cellValue) {
     var intVal = parseInt(cellValue);
     var cellHtml = '<div class="progress"><div class="progress-bar" style="width: ' + intVal + '%"></div></div>'
     return cellHtml;
 }
-function FormatByte(cellValue, options, rowObject) {
+function FormatByte(cellValue) {
     var intVal = parseInt(cellValue);
-    var ras = " B."
+    var ras = " B"
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " KB."
+        ras = " KB"
     }
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " MB."
+        ras = " MB"
     }
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " GB."
+        ras = " GB"
     }
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " TB."
+        ras = " TB"
     }
     var cellHtml = (intVal).toFixed(1) + ras;
     return cellHtml;
 }
-function FormatSpeedByte(cellValue, options, rowObject) {
+function StateIcon(state) {
+    var c,t;
+    switch(state){
+        case 'Completed':
+        c='ok-circle text-success';
+        break;
+        case 'Running':
+        c='play-circle text-info';
+        break;
+        case 'Stopped':
+        c='ban-circle text-warning';
+        break;
+        case 'Failed':
+        c='remove-circle text-danger'
+        break;
+        default:
+        state='Stopped';
+        c='ban-circle text-warning';
+    }
+    t=states[state];
+    return '<span class="glyphicon glyphicon-'+c+'" title="'+t+'"></span>';
+}
+function FormatSpeedByte(cellValue) {
     var intVal = parseInt(cellValue);
-    var ras = " B/sec."
+    var ras = " B/s"
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " KB/sec."
+        ras = " KB/s"
     }
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " MB/sec."
+        ras = " MB/s"
     }
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " GB/sec"
+        ras = " GB/s"
     }
     if (intVal > 1024) {
         intVal /= 1024
-        ras = " TB."
+        ras = " TB/s"
     }
     var cellHtml = (intVal).toFixed(1) + ras;
     return cellHtml;
@@ -124,48 +79,86 @@ function connectSockJS(onopen,onmessage){
 	ws.onopen    = function(){
 		if(onopen!=null)onopen();
 	};
-	ws.onclose   = function(){};
+	ws.onclose   = function(){
+        ws = null;
+    };
 	ws.onmessage = function(msg){
 		if(onmessage!=null)onmessage(msg.data);
 	};
 }
 
-function onLoad() {
-    UpdateTable();
-    FixTable();
-    setInterval(UpdateData, 2000);
-}
-
 function sockJSConnect(){
-    var grid = $("#jqGrid");
-    connectSockJS(null,function(r){
-        var rows=JSON.parse(r), rowKey = grid.jqGrid('getGridParam', "selrow");
-        grid.trigger("reloadGrid");
+    var tmpl = $('#tr-template').html();
+    connectSockJS(function(){
+        ws.send("1");
+    },function(r){
+        var rows=JSON.parse(r);
         var total = 100*rows.length, finished = 0;
+        var content = '';
+        var checkedAll = $('#fileTable .allCheck').prop('checked');
         for (var i = 0; i < rows.length; i++){
             var v = rows[i];
-            grid.jqGrid('addRowData', i, v);
             finished=finished+v.Progress;
+            if($('#id-'+v.Id).length>0){
+                $('#downed-'+v.Id).text(FormatByte(v.Downloaded));
+                $('#percent-'+v.Id).text(v.Progress);
+                $('#speed-'+v.Id).text(FormatSpeedByte(v.Speed));
+                $('#progress-'+v.Id).html(FormatProgressBar(v.Progress));
+                $('#state-'+v.Id).html(StateIcon(v.State));
+                continue;
+            }
+            var tmplCopy=tmpl;
+            for(var j in v){
+                var re=new RegExp('\\{'+j+'\\}','g');
+                var vl=v[j];
+                switch(j){
+                    case 'Downloaded':
+                    vl=FormatByte(vl);
+                    break;
+                    case 'Size':
+                    vl=FormatByte(vl);
+                    break;
+                    case 'Speed':
+                    vl=FormatSpeedByte(vl);
+                    break;
+                    case 'FileName':
+                    vl='<span id="state-'+v.Id+'">'+StateIcon(v.State)+'</span> '+vl;
+                    break;
+                    case 'Progress':
+                    var re2=new RegExp('\\{Percent\\}');
+                    tmplCopy=tmplCopy.replace(re2,vl);
+                    vl=FormatProgressBar(vl);
+                    break;
+                }
+                tmplCopy=tmplCopy.replace(re,vl);
+            }
+            if(checkedAll){
+                tmplCopy=$(tmplCopy);
+                tmplCopy.find('.idCheck').prop('checked',true);
+            }
+            $('#fileList').append(tmplCopy);
         }
-        alert(finished);
-        if(total<=finished){
+        if(iv && total<=finished){
             window.clearInterval(iv);
-        }
-        if (rowKey) {
-            grid.jqGrid("resetSelection")
-            grid.jqGrid('setSelection', rowKey);
+            iv=null;
         }
     });
 }
 
 function sockJSRead(){
-    if(!ws)return;
+    if(iv)return;
+    if(!ws)sockJSConnect();
     iv=setInterval(function(){
-        ws.send("1");
+        if(!ws){
+            window.clearInterval(iv);
+            return;
+        }
+        ws.send("progress");
     }, 2000);
 }
 
-function reqJSON(url,data) {
+function reqJSON(url,data,callback) {
+    loading(false);
     var opt={
         contentType: "application/json; charset=utf-8",
         url: url,
@@ -174,17 +167,21 @@ function reqJSON(url,data) {
     };
     if(data) opt.data = JSON.stringify(data);
     $.ajax(opt).error(function(jsonData) {
+        loading(true);
         alert(jsonData);
     }).success(function(jsonData){
+        loading(true);
         if(jsonData.Code!=1) {
             alert(jsonData.Info);
             return;
         }
+        if(callback)callback();
         sockJSRead();
     });
 }
 
-function reqForm(url,data) {
+function reqForm(url,data,callback) {
+    loading(false);
     var opt={
         url: url,
         type: "POST",
@@ -192,12 +189,15 @@ function reqForm(url,data) {
     };
     if(data) opt.data = data;
     $.ajax(opt).error(function(jsonData) {
+        loading(true);
         alert(jsonData);
     }).success(function(jsonData){
+        loading(true);
         if(jsonData.Code!=1) {
             alert(jsonData.Info);
             return;
         }
+        if(callback)callback();
         sockJSRead();
     });
 }
@@ -210,22 +210,27 @@ function AddDownload() {
     };
     reqJSON("/add_task",req);
 }
+function checkedIds(){
+    var ids = [];
+    $('#fileTable .idCheck:checked').each(function(){
+        ids.push(parseInt($(this).val()));
+    });
+    return ids;
+}
 function RemoveDownload() {
-    var grid = $("#jqGrid");
-    var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
-    var req = {id:rowKey};
-    reqForm("/remove_task",req);
+    var req = {id:checkedIds()};
+    reqForm("/remove_task",req,function(){
+        for(var i=0;i<req.id.length;i++){
+            $('#id-'+req.id[i]).parent('tr').remove();
+        }
+    });
 }
 function StartDownload() {
-    var grid = $("#jqGrid");
-    var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
-    var req = {id:rowKey};
+    var req = {id:checkedIds()};
     reqForm("/start_task",req);
 }
 function StopDownload() {
-    var grid = $("#jqGrid");
-    var rowKey = parseInt(grid.jqGrid('getGridParam', "selrow"));
-    var req = {id:rowKey};
+    var req = {id:checkedIds()};
     reqForm("/stop_task",req);
 }
 function StartAllDownload() {
@@ -238,8 +243,17 @@ function OnChangeUrl() {
     var filename = $("#url_id").val().split('/').pop()
     $("#save_path_id").val(filename)
 }
-
+function loading(close){
+    if(close) return $('#loading').remove();
+    if($('#loading').length<1){
+        var loadingHTML='<div id="loading"><div id="loading-center"><div id="loading-center-absolute"><div id="loading-object"></div></div></div></div>';
+        $('body').prepend(loadingHTML);
+    }
+}
 $(function(){
-    onLoad();
-    //sockJSConnect();sockJSRead();
+    sockJSRead();
+    var allChk=$('#fileTable .allCheck');
+    allChk.on('click',function(){
+        $('#fileTable .idCheck').prop('checked',$(this).prop('checked'));
+    });
 });

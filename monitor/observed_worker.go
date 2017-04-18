@@ -8,8 +8,25 @@ import (
 	"sync"
 )
 
+var States = map[State]string{
+	Stopped:   `Stopped`,
+	Running:   `Running`,
+	Failed:    `Failed`,
+	Completed: `Completed`,
+}
+
+type State int
+
+func (s State) String() string {
+	return States[s]
+}
+
+func (s State) Int() int {
+	return int(s)
+}
+
 const (
-	Stopped = iota
+	Stopped State = iota
 	Running
 	Failed
 	Completed
@@ -33,8 +50,8 @@ type MonitoredWorker struct {
 	Itw    DiscretWork
 	wgrun  sync.WaitGroup
 	guid   string
-	state  int
-	chsig  chan int
+	state  State
+	chsig  chan State
 	stwg   sync.WaitGroup
 	ondone func()
 }
@@ -78,7 +95,7 @@ func (mw *MonitoredWorker) wgoroute() {
 	}
 }
 
-func (mw MonitoredWorker) GetState() int {
+func (mw MonitoredWorker) GetState() State {
 	return mw.state
 }
 
@@ -103,7 +120,7 @@ func (mw *MonitoredWorker) Start() error {
 		mw.state = Failed
 		return err
 	}
-	mw.chsig = make(chan int, 1)
+	mw.chsig = make(chan State, 1)
 	mw.state = Running
 	mw.wgrun.Add(1)
 	go mw.wgoroute()
@@ -119,10 +136,6 @@ func (mw *MonitoredWorker) Stop() error {
 	}
 	if mw.chsig != nil {
 		mw.chsig <- Stopped
-		defer func() {
-			close(mw.chsig)
-			mw.chsig = nil
-		}()
 	}
 	mw.wgrun.Wait()
 	if err := mw.Itw.AfterStop(); err != nil {

@@ -66,6 +66,7 @@ func main() {
 	renderOptions := &render.Config{
 		TmplDir: `./template`,
 		Engine:  `standard`,
+		Reload:  true,
 	}
 	renderOptions.ApplyTo(defaults.Default)
 	if renderMgr != nil {

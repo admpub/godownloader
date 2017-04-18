@@ -10,6 +10,7 @@ type WorkerPool struct {
 	total      int32
 	done       int32
 	onComplete func()
+	state      State
 }
 
 func (wp *WorkerPool) AppendWork(iv *MonitoredWorker) {
@@ -19,8 +20,11 @@ func (wp *WorkerPool) AppendWork(iv *MonitoredWorker) {
 	iv.ondone = func() {
 		atomic.AddInt32(&wp.done, 1)
 		log.Printf("info: complete %d/%d", wp.done, wp.total)
-		if wp.onComplete != nil && wp.Completed() {
-			wp.onComplete()
+		if wp.Completed() {
+			if wp.onComplete != nil {
+				wp.onComplete()
+			}
+			wp.state = Completed
 		}
 	}
 	wp.workers[iv.GetId()] = iv
@@ -42,6 +46,7 @@ func (wp *WorkerPool) StartAll() []error {
 			errs = append(errs, err)
 		}
 	}
+	wp.state = Running
 	return errs
 }
 
@@ -52,6 +57,7 @@ func (wp *WorkerPool) StopAll() []error {
 			errs = append(errs, err)
 		}
 	}
+	wp.state = Stopped
 	return errs
 }
 
@@ -61,4 +67,8 @@ func (wp *WorkerPool) GetAllProgress() interface{} {
 		pr = append(pr, value.GetProgress())
 	}
 	return pr
+}
+
+func (wp *WorkerPool) State() State {
+	return wp.state
 }
