@@ -1,6 +1,7 @@
 package iotools
 
 import (
+	"log"
 	"os"
 	"sync"
 )
@@ -10,7 +11,6 @@ type SafeFile struct {
 	lock     sync.Mutex
 	filePath string
 	closed   bool
-	opened   []*os.File
 }
 
 func (sf *SafeFile) WriteAt(b []byte, off int64) (n int, err error) {
@@ -31,33 +31,13 @@ func (sf *SafeFile) Close() error {
 	if sf.closed {
 		return nil
 	}
-	sf.closed = true
-	for i, f := range sf.opened {
-		if f == sf.File {
-			start := i + 1
-			if start < len(sf.opened) {
-				sf.opened = append(sf.opened[0:i], sf.opened[start:0]...)
-			} else {
-				sf.opened = sf.opened[0:i]
-			}
-		}
+	err := sf.File.Close()
+	if err == nil {
+		sf.closed = true
+	} else {
+		log.Println(`-> close file`, sf.filePath, `error:`, err)
 	}
-	return sf.File.Close()
-}
-
-func (sf *SafeFile) Opened() int {
-	return len(sf.opened)
-}
-
-func (sf *SafeFile) OpenedFiles() []*os.File {
-	return sf.opened
-}
-
-func (sf *SafeFile) CloseAll() {
-	for _, f := range sf.opened {
-		f.Close()
-	}
-	sf.opened = []*os.File{}
+	return err
 }
 
 func (sf *SafeFile) ReOpen() error {
@@ -67,13 +47,17 @@ func (sf *SafeFile) ReOpen() error {
 		return nil
 	}
 	f, err := os.OpenFile(sf.filePath, os.O_RDWR, 0666)
+	if err == nil {
+		sf.closed = false
+	} else {
+		log.Println(`=> open file`, sf.filePath, `error:`, err)
+	}
 	sf.File = f
-	sf.opened = append(sf.opened, f)
 	return err
 }
 
 func OpenSafeFile(name string) (file *SafeFile, err error) {
-	file = &SafeFile{filePath: name, opened: []*os.File{}}
+	file = &SafeFile{filePath: name, closed: true}
 	err = file.ReOpen()
 	return
 }
@@ -81,9 +65,6 @@ func OpenSafeFile(name string) (file *SafeFile, err error) {
 func CreateSafeFile(name string) (file *SafeFile, err error) {
 	var f *os.File
 	f, err = os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	file = &SafeFile{File: f, filePath: name, opened: []*os.File{}}
-	if err == nil {
-		file.opened = append(file.opened, f)
-	}
+	file = &SafeFile{File: f, filePath: name}
 	return
 }

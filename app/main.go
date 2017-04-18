@@ -57,7 +57,8 @@ func main() {
 	log.Printf("GUI located add http://localhost:%d/\n", port)
 
 	defaults.SetDebug(true)
-	defaults.Use(mw.Log(), mw.Recover())
+	//defaults.Use(mw.Log())
+	defaults.Use(mw.Recover())
 	// 注册静态资源文件
 	defaults.Use(staticMW)
 

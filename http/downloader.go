@@ -124,6 +124,6 @@ func RestoreDownloader(url string, fp string, dp []DownloadProgress) (dl *Downlo
 func closeSafeFile(d *Downloader) {
 	d.wp.AfterComplete(func() {
 		log.Println(`info: close file`, d.Fi.FileName)
-		d.sf.CloseAll()
+		d.sf.Close()
 	})
 }
