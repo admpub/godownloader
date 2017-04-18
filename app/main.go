@@ -39,6 +39,12 @@ func getSetPath() string {
 
 func main() {
 	var port int
+	var host string
+	var user string
+	var pass string
+	flag.StringVar(&user, `user`, ``, `username`)
+	flag.StringVar(&pass, `pass`, ``, `password`)
+	flag.StringVar(&host, `h`, `127.0.0.1`, `host`)
 	flag.IntVar(&port, `p`, 9981, `port`)
 
 	gdownsrv := new(DownloadService.DServ)
@@ -62,6 +68,15 @@ func main() {
 	// 注册静态资源文件
 	defaults.Use(staticMW)
 
+	if len(user) > 0 && len(pass) > 0 {
+		defaults.Use(mw.BasicAuth(func(username, password string) bool {
+			if username == user && password == pass {
+				return true
+			}
+			return false
+		}))
+	}
+
 	// 注册模板引擎
 	renderOptions := &render.Config{
 		TmplDir: `./template`,
@@ -78,5 +93,5 @@ func main() {
 		},
 	}))
 	defaults.Use(language.New(langConf).Middleware())
-	log.Println(gdownsrv.Start(port))
+	log.Println(gdownsrv.Start(host, port))
 }

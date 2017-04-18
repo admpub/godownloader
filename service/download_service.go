@@ -38,7 +38,7 @@ type DServ struct {
 	oplock sync.Mutex
 }
 
-func (srv *DServ) Start(listenPort int) error {
+func (srv *DServ) Start(listenHost string, listenPort int) error {
 	defaults.Route("GET,POST", "/", srv.index)
 	defaults.Route("GET,POST", "/index.html", srv.index)
 	defaults.Route("GET,POST", "/progress.json", srv.progressJson)
@@ -53,7 +53,7 @@ func (srv *DServ) Start(listenPort int) error {
 		Prefix: "/progress",
 	}
 	sockjsOpts.Wrapper(defaults.Default)
-	defaults.Run(standard.New(":" + strconv.Itoa(listenPort)))
+	defaults.Run(standard.New(listenHost + ":" + strconv.Itoa(listenPort)))
 	return nil
 }
 
