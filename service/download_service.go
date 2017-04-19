@@ -18,7 +18,7 @@ import (
 
 var savePath string
 
-func getDown() string {
+func GetDownloadPath() string {
 	if len(savePath) > 0 {
 		return savePath
 	}
@@ -73,7 +73,7 @@ func (srv *DServ) SetSavePath(savePath func() string) *DServ {
 
 func (srv *DServ) SavePath() func() string {
 	if srv.savePath == nil {
-		return getDown
+		return GetDownloadPath
 	}
 	return srv.savePath
 }
