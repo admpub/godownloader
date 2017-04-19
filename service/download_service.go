@@ -1,11 +1,13 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
+	"os"
+	"os/user"
+	"strconv"
 	"sync"
-
-	"encoding/json"
 
 	"github.com/admpub/godownloader/httpclient"
 	"github.com/admpub/sockjs-go/sockjs"
@@ -13,6 +15,13 @@ import (
 	"github.com/webx-top/echo/engine"
 	sockjsHandler "github.com/webx-top/echo/handler/sockjs"
 )
+
+func getDown() string {
+	usr, _ := user.Current()
+	st := strconv.QuoteRune(os.PathSeparator)
+	st = st[1 : len(st)-1]
+	return usr.HomeDir + st + "Downloads" + st
+}
 
 type DJob struct {
 	Id         int
@@ -31,14 +40,31 @@ type NewJob struct {
 }
 
 type DServ struct {
-	dls    []*httpclient.Downloader
-	oplock sync.Mutex
-	tmpl   string
+	dls      []*httpclient.Downloader
+	oplock   sync.Mutex
+	tmpl     string
+	savePath func() string
 }
 
 func (srv *DServ) SetTmpl(tmpl string) *DServ {
 	srv.tmpl = tmpl
 	return srv
+}
+
+func (srv *DServ) Tmpl() string {
+	return srv.tmpl
+}
+
+func (srv *DServ) SetSavePath(savePath func() string) *DServ {
+	srv.savePath = savePath
+	return srv
+}
+
+func (srv *DServ) SavePath() func() string {
+	if srv.savePath == nil {
+		return getDown
+	}
+	return srv.savePath
 }
 
 func (srv *DServ) Register(r echo.RouteRegister, enableSockJS bool) {
@@ -85,7 +111,7 @@ func (srv *DServ) LoadSettings(sf string) error {
 	}
 	log.Println(ss)
 	for _, r := range ss.Ds {
-		dl, err := httpclient.RestoreDownloader(r.FI.Url, r.FI.FileName, r.Dp)
+		dl, err := httpclient.RestoreDownloader(r.FI.Url, r.FI.FileName, r.Dp, srv.SavePath())
 		if err != nil {
 			return err
 		}
@@ -106,7 +132,7 @@ func (srv *DServ) addTask(ctx echo.Context) error {
 	if err := ctx.MustBind(&nj); err != nil {
 		return ctx.JSON(data.SetError(err))
 	}
-	dl, err := httpclient.CreateDownloader(nj.Url, nj.FilePath, nj.PartCount)
+	dl, err := httpclient.CreateDownloader(nj.Url, nj.FilePath, nj.PartCount, srv.SavePath())
 	if err != nil {
 		return ctx.JSON(data.SetError(err))
 	}
