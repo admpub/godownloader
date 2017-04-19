@@ -6,8 +6,11 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strconv"
 	"sync"
+
+	"strings"
 
 	"github.com/admpub/godownloader/httpclient"
 	"github.com/admpub/sockjs-go/sockjs"
@@ -142,6 +145,13 @@ func (srv *DServ) addTask(ctx echo.Context) error {
 	data := ctx.NewData()
 	if err := ctx.MustBind(&nj); err != nil {
 		return ctx.JSON(data.SetError(err))
+	}
+	nj.FilePath = strings.Replace(nj.FilePath, `..`, ``, -1)
+	nj.FilePath = filepath.Clean(nj.FilePath)
+	if filepath.Separator == '/' {
+		nj.FilePath = strings.TrimLeft(nj.FilePath, `/`)
+	} else {
+		nj.FilePath = strings.TrimLeft(nj.FilePath, `\`)
 	}
 	dl, err := httpclient.CreateDownloader(nj.Url, nj.FilePath, nj.PartCount, srv.SavePath())
 	if err != nil {
