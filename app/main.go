@@ -62,7 +62,7 @@ func main() {
 	gdownsrv.LoadSettings(getSetPath())
 	log.Printf("GUI located add http://localhost:%d/\n", port)
 
-	defaults.SetDebug(true)
+	defaults.SetDebug(bindata == false)
 	//defaults.Use(mw.Log())
 	defaults.Use(mw.Recover())
 	// 注册静态资源文件
