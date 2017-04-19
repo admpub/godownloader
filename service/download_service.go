@@ -192,10 +192,10 @@ func (srv *DServ) removeTask(ctx echo.Context) error {
 func (srv *DServ) progressJson(ctx echo.Context) error {
 	srv.oplock.Lock()
 	defer srv.oplock.Unlock()
-	return ctx.JSON(srv.progress())
+	return ctx.JSON(srv.Progress())
 }
 
-func (srv *DServ) progress() []DJob {
+func (srv *DServ) Progress() []DJob {
 	jbs := make([]DJob, 0, len(srv.dls))
 	for ind, i := range srv.dls {
 		prs := i.GetProgress()
@@ -230,7 +230,7 @@ func (srv *DServ) ProgressSockJS(c sockjs.Session) error {
 			if len(command) == 0 {
 				continue
 			}
-			message, _ := json.Marshal(srv.progress())
+			message, _ := json.Marshal(srv.Progress())
 			if err := c.Send(engine.Bytes2str(message)); err != nil {
 				log.Println(`Push error: `, err.Error())
 				return err
