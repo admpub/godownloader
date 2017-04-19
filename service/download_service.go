@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"log"
-	"strconv"
 	"sync"
 
 	"encoding/json"
@@ -11,9 +10,7 @@ import (
 	"github.com/admpub/godownloader/httpclient"
 	"github.com/admpub/sockjs-go/sockjs"
 	"github.com/webx-top/echo"
-	"github.com/webx-top/echo/defaults"
 	"github.com/webx-top/echo/engine"
-	"github.com/webx-top/echo/engine/standard"
 	sockjsHandler "github.com/webx-top/echo/handler/sockjs"
 )
 
@@ -38,23 +35,24 @@ type DServ struct {
 	oplock sync.Mutex
 }
 
-func (srv *DServ) Start(listenHost string, listenPort int) error {
-	defaults.Route("GET,POST", "/", srv.index)
-	defaults.Route("GET,POST", "/index.html", srv.index)
-	defaults.Route("GET,POST", "/progress.json", srv.progressJson)
-	defaults.Route("GET,POST", "/add_task", srv.addTask)
-	defaults.Route("GET,POST", "/remove_task", srv.removeTask)
-	defaults.Route("GET,POST", "/start_task", srv.startTask)
-	defaults.Route("GET,POST", "/stop_task", srv.stopTask)
-	defaults.Route("GET,POST", "/start_all_task", srv.startAllTask)
-	defaults.Route("GET,POST", "/stop_all_task", srv.stopAllTask)
+func (srv *DServ) Register(r echo.RouteRegister, enableSockJS bool) {
+	r.Route("GET", "/", srv.index)
+	r.Route("GET", "/index.html", srv.index)
+	r.Route("GET,POST", "/progress.json", srv.progressJson)
+	r.Route("GET,POST", "/add_task", srv.addTask)
+	r.Route("GET,POST", "/remove_task", srv.removeTask)
+	r.Route("GET,POST", "/start_task", srv.startTask)
+	r.Route("GET,POST", "/stop_task", srv.stopTask)
+	r.Route("GET,POST", "/start_all_task", srv.startAllTask)
+	r.Route("GET,POST", "/stop_all_task", srv.stopAllTask)
+	if !enableSockJS {
+		return
+	}
 	sockjsOpts := sockjsHandler.Options{
-		Handle: srv.progressJsonSockJS,
+		Handle: srv.ProgressSockJS,
 		Prefix: "/progress",
 	}
-	sockjsOpts.Wrapper(defaults.Default)
-	defaults.Run(standard.New(listenHost + ":" + strconv.Itoa(listenPort)))
-	return nil
+	sockjsOpts.Wrapper(r)
 }
 
 func (srv *DServ) SaveSettings(sf string) error {
@@ -212,7 +210,7 @@ func (srv *DServ) progress() []DJob {
 	return jbs
 }
 
-func (srv *DServ) progressJsonSockJS(c sockjs.Session) error {
+func (srv *DServ) ProgressSockJS(c sockjs.Session) error {
 	exec := func(session sockjs.Session) error {
 		for {
 			command, err := session.Recv()

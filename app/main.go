@@ -7,11 +7,13 @@ import (
 	"os/signal"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"syscall"
 
 	"github.com/admpub/godownloader/service"
 	loga "github.com/admpub/log"
 	"github.com/webx-top/echo/defaults"
+	"github.com/webx-top/echo/engine/standard"
 	mw "github.com/webx-top/echo/middleware"
 	"github.com/webx-top/echo/middleware/language"
 	"github.com/webx-top/echo/middleware/render"
@@ -99,5 +101,6 @@ func main() {
 		},
 	}))
 	defaults.Use(language.New(langConf).Middleware())
-	log.Println(gdownsrv.Start(host, port))
+	gdownsrv.Register(defaults.Default, true)
+	defaults.Run(standard.New(host + ":" + strconv.Itoa(port)))
 }
