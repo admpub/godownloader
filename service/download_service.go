@@ -1,4 +1,4 @@
-package DownloadService
+package service
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/admpub/godownloader/http"
+	"github.com/admpub/godownloader/httpclient"
 	"github.com/admpub/sockjs-go/sockjs"
 	"github.com/webx-top/echo"
 	"github.com/webx-top/echo/defaults"

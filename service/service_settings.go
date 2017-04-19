@@ -1,10 +1,11 @@
-package DownloadService
+package service
 
 import (
 	"encoding/json"
-	"github.com/admpub/godownloader/http"
 	"io/ioutil"
 	"log"
+
+	"github.com/admpub/godownloader/httpclient"
 )
 
 type DownloadSettings struct {

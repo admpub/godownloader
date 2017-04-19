@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/admpub/godownloader/service"
+	loga "github.com/admpub/log"
 	"github.com/webx-top/echo/defaults"
 	mw "github.com/webx-top/echo/middleware"
 	"github.com/webx-top/echo/middleware/language"
@@ -47,7 +48,7 @@ func main() {
 	flag.StringVar(&host, `h`, `127.0.0.1`, `host`)
 	flag.IntVar(&port, `p`, 9981, `port`)
 
-	gdownsrv := new(DownloadService.DServ)
+	gdownsrv := new(service.DServ)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
@@ -61,9 +62,14 @@ func main() {
 	}()
 	gdownsrv.LoadSettings(getSetPath())
 	log.Printf("GUI located add http://localhost:%d/\n", port)
-
-	defaults.SetDebug(bindata == false)
-	//defaults.Use(mw.Log())
+	if bindata {
+		defaults.SetDebug(false)
+		loga.SetLevel(`Info`)
+	} else {
+		defaults.SetDebug(true)
+		loga.SetLevel(`Debug`)
+	}
+	defaults.Use(mw.Log())
 	defaults.Use(mw.Recover())
 	// 注册静态资源文件
 	defaults.Use(staticMW)

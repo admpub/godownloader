@@ -11,7 +11,7 @@ It happen in difference realization kill process linux and Windows
 in linux OS kill process work normal.
 App capture signal and do some cleanup stuff
 
-    gdownsrv := new(DownloadService.DServ)
+    gdownsrv := new(service.DServ)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
