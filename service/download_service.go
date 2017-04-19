@@ -16,11 +16,22 @@ import (
 	sockjsHandler "github.com/webx-top/echo/handler/sockjs"
 )
 
+var savePath string
+
 func getDown() string {
+	if len(savePath) > 0 {
+		return savePath
+	}
 	usr, _ := user.Current()
 	st := strconv.QuoteRune(os.PathSeparator)
 	st = st[1 : len(st)-1]
-	return usr.HomeDir + st + "Downloads" + st
+	sv := usr.HomeDir + st + "Downloads" + st + "GoDownloader" + st
+	fi, err := os.Stat(sv)
+	if err != nil || !fi.IsDir() {
+		os.MkdirAll(sv, os.ModePerm)
+	}
+	savePath = sv
+	return sv
 }
 
 type DJob struct {
