@@ -33,9 +33,18 @@ type NewJob struct {
 type DServ struct {
 	dls    []*httpclient.Downloader
 	oplock sync.Mutex
+	tmpl   string
+}
+
+func (srv *DServ) SetTmpl(tmpl string) *DServ {
+	srv.tmpl = tmpl
+	return srv
 }
 
 func (srv *DServ) Register(r echo.RouteRegister, enableSockJS bool) {
+	if len(srv.tmpl) == 0 {
+		srv.tmpl = "index"
+	}
 	r.Route("GET", "/", srv.index)
 	r.Route("GET", "/index.html", srv.index)
 	r.Route("GET,POST", "/progress.json", srv.progressJson)
@@ -86,7 +95,7 @@ func (srv *DServ) LoadSettings(sf string) error {
 }
 
 func (srv *DServ) index(ctx echo.Context) error {
-	return ctx.Render("index", nil)
+	return ctx.Render(srv.tmpl, nil)
 }
 
 func (srv *DServ) addTask(ctx echo.Context) error {
