@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"os/user"
-	"path/filepath"
 	"strconv"
 	"sync"
 
@@ -31,7 +30,7 @@ func GetDownloadPath() string {
 	sv := usr.HomeDir + st + "Downloads" + st + "GoDownloader" + st
 	fi, err := os.Stat(sv)
 	if err != nil || !fi.IsDir() {
-		os.MkdirAll(sv, os.ModePerm)
+		os.MkdirAll(sv, 0666)
 	}
 	savePath = sv
 	return sv
@@ -147,12 +146,8 @@ func (srv *DServ) addTask(ctx echo.Context) error {
 		return ctx.JSON(data.SetError(err))
 	}
 	nj.FilePath = strings.Replace(nj.FilePath, `..`, ``, -1)
-	nj.FilePath = filepath.Clean(nj.FilePath)
-	if filepath.Separator == '/' {
-		nj.FilePath = strings.TrimLeft(nj.FilePath, `/`)
-	} else {
-		nj.FilePath = strings.TrimLeft(nj.FilePath, `\`)
-	}
+	nj.FilePath = strings.TrimLeft(nj.FilePath, `/`)
+	nj.FilePath = strings.TrimLeft(nj.FilePath, `\`)
 	dl, err := httpclient.CreateDownloader(nj.Url, nj.FilePath, nj.PartCount, srv.SavePath())
 	if err != nil {
 		return ctx.JSON(data.SetError(err))

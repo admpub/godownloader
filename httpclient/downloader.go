@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/admpub/godownloader/iotools"
 	"github.com/admpub/godownloader/monitor"
@@ -50,8 +51,8 @@ func CreateDownloader(url string, fp string, seg int64, getDown func() string) (
 		//can't get file size
 		return nil, err
 	}
-
 	dfs := getDown() + fp
+	dfs = filepath.Clean(dfs)
 	sf, err := iotools.CreateSafeFile(dfs)
 	if err != nil {
 		//can't create file on path
