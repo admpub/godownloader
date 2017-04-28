@@ -5,7 +5,7 @@ package main
 import (
 	"net/http"
 
-	assetfs "github.com/elazarl/go-bindata-assetfs"
+	assetfs "github.com/admpub/go-bindata-assetfs"
 	bindataLib "github.com/webx-top/echo/middleware/bindata"
 )
 
