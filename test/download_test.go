@@ -1,19 +1,21 @@
 package dtest_test
 
 import (
-	"github.com/admpub/godownloader/http"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/admpub/godownloader/httpclient"
+	"github.com/admpub/godownloader/service"
 )
 
 func TestDownload(t *testing.T) {
-	dl, err := httpclient.CreateDownloader("http://pinegrow.s3.amazonaws.com/PinegrowLinux64.2.2.zip", "PinegrowLinux64.2.2.zip", 7)
+	dl, err := httpclient.CreateDownloader("http://pinegrow.s3.amazonaws.com/PinegrowLinux64.2.2.zip", "PinegrowLinux64.2.2.zip", 7, service.GetDownloadPath)
 	if err != nil {
 		t.Error("failed: can't create downloader")
 	}
 	errs := dl.StartAll()
-	if len(errs)>0 {
+	if len(errs) > 0 {
 		t.Error("failed: can't start downloader")
 	}
 	for {
