@@ -41,7 +41,11 @@ func init() {
 		var done = make(chan struct{})
 		ctx, _ := context.WithCancel(context.Background())
 		go func() {
-			err = cfg.Get(ctx)
+			err = d.SafeFile().ReOpen()
+			if err == nil {
+				err = cfg.Get(ctx, d.SafeFile().File)
+				d.SafeFile().Close()
+			}
 			done <- struct{}{}
 		}()
 		t := time.NewTicker(time.Second * 1)
