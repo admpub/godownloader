@@ -1,11 +1,12 @@
 package dtest
 
 import (
-	"github.com/admpub/godownloader/http"
-	"github.com/admpub/godownloader/iotools"
-	"github.com/admpub/godownloader/monitor"
 	"testing"
 	"time"
+
+	"github.com/admpub/godownloader/httpclient"
+	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/monitor"
 )
 
 func TestMultiPartDownloadPool(t *testing.T) {
@@ -25,7 +26,7 @@ func TestMultiPartDownloadPool(t *testing.T) {
 		wp.AppendWork(&mv)
 	}
 	lastseg := c - (ps * (pc - 1))
-	dow := httpclient.CreatePartialDownloader(url, f, lastseg,lastseg, c)
+	dow := httpclient.CreatePartialDownloader(url, f, lastseg, lastseg, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
 	wp.AppendWork(&mv)
 	wp.StartAll()

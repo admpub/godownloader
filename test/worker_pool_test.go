@@ -3,11 +3,12 @@ package dtest
 import (
 	"errors"
 	"fmt"
-	"github.com/admpub/godownloader/monitor"
 	"log"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/admpub/godownloader/monitor"
 )
 
 type TestWorkPool struct {

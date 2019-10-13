@@ -1,11 +1,12 @@
 package dtest
 
-import "github.com/admpub/godownloader/monitor"
-import "testing"
 import (
 	"errors"
 	"log"
+	"testing"
 	"time"
+
+	"github.com/admpub/godownloader/monitor"
 )
 
 type TestWork struct {

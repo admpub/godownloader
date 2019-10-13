@@ -1,9 +1,10 @@
 package dtest
 
 import (
-	"github.com/admpub/godownloader/http"
-	"github.com/admpub/godownloader/iotools"
 	"testing"
+
+	"github.com/admpub/godownloader/httpclient"
+	"github.com/admpub/godownloader/iotools"
 )
 
 func TestMultiThreadSuppurt(t *testing.T) {
@@ -40,7 +41,7 @@ func TestPartDownload(t *testing.T) {
 	f, _ := iotools.CreateSafeFile("part_download.data")
 	defer f.Close()
 	f.Truncate(c)
-	dow := httpclient.CreatePartialDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0,0, c)
+	dow := httpclient.CreatePartialDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, 0, c)
 	dow.BeforeRun()
 	for {
 		sta, _ := dow.DoWork()

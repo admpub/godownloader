@@ -1,12 +1,13 @@
 package dtest
 
 import (
-	"github.com/admpub/godownloader/http"
-	"github.com/admpub/godownloader/iotools"
-	"github.com/admpub/godownloader/monitor"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/admpub/godownloader/httpclient"
+	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/monitor"
 )
 
 func TestPartDownloadWorker(t *testing.T) {
@@ -17,7 +18,7 @@ func TestPartDownloadWorker(t *testing.T) {
 	f, _ := iotools.CreateSafeFile("g_ubuntu-14.04.2-server-amd64.list")
 	defer f.Close()
 	log.Println(f.Truncate(c))
-	dow := httpclient.CreatePartialDownloader(url, f, 0,0, c)
+	dow := httpclient.CreatePartialDownloader(url, f, 0, 0, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
 	log.Println(mv.Start())
 	log.Println(mv.Start())
