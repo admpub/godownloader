@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -47,9 +48,14 @@ func init() {
 			err = d.SafeFile().ReOpen()
 			if err == nil {
 				err = cfg.Get(ctx, d.SafeFile().File)
-				d.SafeFile().Close()
+				if err2 := d.SafeFile().Close(); err2 != nil {
+					log.Println(err2)
+				}
 				if err == nil {
 					tsFile := d.SafeFile().FilePath()
+					if !filepath.IsAbs(tsFile) {
+						tsFile = filepath.Join(GetDownloadPath(), tsFile)
+					}
 					mp4File := strings.TrimSuffix(tsFile, ext) + `.mp4`
 					if err := utils.ConvertToMP4(tsFile, mp4File); err != nil {
 						if !utils.IsUnsupported(err) {
