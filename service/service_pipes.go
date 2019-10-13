@@ -45,6 +45,8 @@ func init() {
 			if err == nil {
 				err = cfg.Get(ctx, d.SafeFile().File)
 				d.SafeFile().Close()
+			} else {
+				log.Println(d.SafeFile().FilePath(), `reopen file failed:`, err)
 			}
 			done <- struct{}{}
 		}()
