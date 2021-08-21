@@ -30,3 +30,5 @@ _testmain.go
 /app/test
 /app/bindata_assetfs.go
 /app/builder/dist
+go.mod
+go.sum
