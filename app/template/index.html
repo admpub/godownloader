@@ -49,7 +49,7 @@
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{"Languages"|T}} <b class="caret"></b></a>
 					<ul class="dropdown-menu">
 						{{range $k, $v := Languages}}
-						<li{{if eq $v Lang}} class="active"{{end}}>
+						<li{{if eq $v Lang.String}} class="active"{{end}}>
 							<a href="?lang={{$v}}">{{$v}}</a>
 						</li>
 						{{end}}
