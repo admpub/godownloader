@@ -32,3 +32,4 @@ _testmain.go
 /app/builder/dist
 go.mod
 go.sum
+tower-app-*
