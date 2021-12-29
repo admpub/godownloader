@@ -89,8 +89,10 @@ func init() {
 				return err
 			case <-ctx.Done():
 				log.Println(`m3u8 download canceled:`, cfg.OutputFile)
+				cancelFunc()
 				return err
 			case <-t.C:
+				cancelFunc()
 				d.Fi.Size = cfg.Progress().FinishedSize
 			}
 		}
