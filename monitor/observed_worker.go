@@ -128,7 +128,7 @@ func (mw *MonitoredWorker) Stop() error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()
 	if mw.state != Running {
-		return ErrStopNoRunningJob
+		return ErrStopNonRunningJob
 	}
 	if mw.chsig != nil {
 		mw.chsig <- Stopped
