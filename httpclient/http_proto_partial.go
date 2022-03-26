@@ -13,7 +13,7 @@ import (
 type PartialDownloader struct {
 	dp     DownloadProgress
 	client http.Client
-	req    http.Response
+	req    *http.Response
 	url    string
 	file   *iotools.SafeFile
 }
@@ -33,6 +33,9 @@ func (pd PartialDownloader) GetProgress() interface{} {
 }
 
 func (pd *PartialDownloader) BeforeDownload() error {
+	if pd.dp.Pos >= pd.dp.To {
+		return nil
+	}
 	//create new req
 	r, err := http.NewRequest("GET", pd.url, nil)
 	if err != nil {
@@ -51,11 +54,14 @@ func (pd *PartialDownloader) BeforeDownload() error {
 
 		return errors.New("error: file not found or moved")
 	}
-	pd.req = *resp
+	pd.req = resp
 	return nil
 }
 
 func (pd *PartialDownloader) AfterStopDownload() error {
+	if pd.req == nil {
+		return nil
+	}
 	log.Println("info: try sync file")
 	err := pd.file.Sync()
 	pd.req.Body.Close()
@@ -81,34 +87,38 @@ func (pd *PartialDownloader) messureSpeed(realc int) {
 }
 
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
-	//write flush data to disk
-	buffer := make([]byte, FlushDiskSize, FlushDiskSize)
+	if pd.req != nil {
+		//write flush data to disk
+		buffer := make([]byte, FlushDiskSize)
 
-	count, err := pd.req.Body.Read(buffer)
-	if (err != nil) && (err.Error() != "EOF") {
-		pd.req.Body.Close()
-		pd.file.Sync()
-		return true, err
-	}
-	//log.Printf("returned from server %v bytes", count)
-	if pd.dp.Pos+int64(count) > pd.dp.To {
-		count = int(pd.dp.To - pd.dp.Pos)
-		log.Printf("warning: server return to much for me i give only %v bytes", count)
-	}
+		count, err := pd.req.Body.Read(buffer)
+		if (err != nil) && (err.Error() != "EOF") {
+			pd.req.Body.Close()
+			pd.file.Sync()
+			return true, err
+		}
+		//log.Printf("returned from server %v bytes", count)
+		if pd.dp.Pos+int64(count) > pd.dp.To {
+			count = int(pd.dp.To - pd.dp.Pos)
+			log.Printf("warning: server return to much for me i give only %v bytes", count)
+		}
 
-	realc, err := pd.file.WriteAt(buffer[:count], pd.dp.Pos)
-	if err != nil {
-		pd.file.Sync()
-		pd.req.Body.Close()
-		return true, err
+		realc, err := pd.file.WriteAt(buffer[:count], pd.dp.Pos)
+		if err != nil {
+			pd.file.Sync()
+			pd.req.Body.Close()
+			return true, err
+		}
+		pd.dp.Pos = pd.dp.Pos + int64(realc)
+		pd.messureSpeed(realc)
 	}
-	pd.dp.Pos = pd.dp.Pos + int64(realc)
-	pd.messureSpeed(realc)
 	//log.Printf("writed %v pos %v to %v", realc, pd.dp.Pos, pd.dp.To)
 	if pd.dp.Pos == pd.dp.To {
 		//ok download part complete normal
-		pd.file.Sync()
-		pd.req.Body.Close()
+		if pd.req != nil {
+			pd.file.Sync()
+			pd.req.Body.Close()
+		}
 		pd.dp.Speed = 0
 		log.Printf("info: download complete normal")
 		return true, nil
