@@ -34,6 +34,9 @@ func (pd PartialDownloader) GetProgress() interface{} {
 
 func (pd *PartialDownloader) BeforeDownload() error {
 	if pd.dp.Pos >= pd.dp.To {
+		if pd.req != nil {
+			pd.req = nil
+		}
 		return nil
 	}
 	//create new req
