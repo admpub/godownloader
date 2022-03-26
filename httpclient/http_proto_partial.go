@@ -59,13 +59,7 @@ func (pd *PartialDownloader) BeforeDownload() error {
 }
 
 func (pd *PartialDownloader) AfterStopDownload() error {
-	if pd.req == nil {
-		return nil
-	}
-	log.Println("info: try sync file")
-	err := pd.file.Sync()
-	pd.req.Body.Close()
-	return err
+	return pd.close()
 }
 
 func (pd *PartialDownloader) BeforeRun() error {
@@ -86,6 +80,16 @@ func (pd *PartialDownloader) messureSpeed(realc int) {
 	}
 }
 
+func (pd *PartialDownloader) close() (err error) {
+	if pd.req != nil {
+		log.Println("info: try sync file")
+		err = pd.file.Sync()
+		pd.req.Body.Close()
+		pd.req = nil
+	}
+	return
+}
+
 func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	if pd.req != nil {
 		//write flush data to disk
@@ -93,8 +97,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 
 		count, err := pd.req.Body.Read(buffer)
 		if (err != nil) && (err.Error() != "EOF") {
-			pd.req.Body.Close()
-			pd.file.Sync()
+			pd.close()
 			return true, err
 		}
 		//log.Printf("returned from server %v bytes", count)
@@ -105,8 +108,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 
 		realc, err := pd.file.WriteAt(buffer[:count], pd.dp.Pos)
 		if err != nil {
-			pd.file.Sync()
-			pd.req.Body.Close()
+			pd.close()
 			return true, err
 		}
 		pd.dp.Pos = pd.dp.Pos + int64(realc)
@@ -115,10 +117,7 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	//log.Printf("writed %v pos %v to %v", realc, pd.dp.Pos, pd.dp.To)
 	if pd.dp.Pos == pd.dp.To {
 		//ok download part complete normal
-		if pd.req != nil {
-			pd.file.Sync()
-			pd.req.Body.Close()
-		}
+		pd.close()
 		pd.dp.Speed = 0
 		log.Printf("info: download complete normal")
 		return true, nil
