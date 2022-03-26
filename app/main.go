@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"os/user"
-	"path/filepath"
 	"strconv"
 	"syscall"
 
@@ -35,11 +33,6 @@ var (
 	}
 )
 
-func getSetPath() string {
-	usr, _ := user.Current()
-	return filepath.Join(usr.HomeDir, ".godownload")
-}
-
 func main() {
 	var port int
 	var host string
@@ -58,11 +51,11 @@ func main() {
 		<-c
 		func() {
 			gdownsrv.StopAllTask()
-			log.Println("info: save setting ", gdownsrv.SaveSettings(getSetPath()))
+			log.Println("info: save setting ", gdownsrv.SaveSettings())
 		}()
 		os.Exit(1)
 	}()
-	gdownsrv.LoadSettings(getSetPath())
+	gdownsrv.LoadSettings()
 	log.Printf("GUI located add http://localhost:%d/\n", port)
 	if bindata {
 		defaults.SetDebug(false)
