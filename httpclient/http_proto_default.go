@@ -13,7 +13,6 @@ import (
 type DefaultDownloader struct {
 	dp         DownloadProgress
 	client     http.Client
-	req        http.Response
 	url        string
 	file       *iotools.SafeFile
 	context    context.Context
@@ -27,6 +26,7 @@ func CreateDefaultDownloader(url string, file *iotools.SafeFile) *DefaultDownloa
 	pd.dp.From = 0
 	pd.dp.To = 1
 	pd.dp.Pos = 0
+	pd.dp.IsPartial = false
 	return &pd
 }
 
@@ -70,4 +70,8 @@ func (pd *DefaultDownloader) DoWork() (bool, error) {
 	}
 	pd.dp.From = 1
 	return true, nil
+}
+
+func (pd *DefaultDownloader) IsPartialDownload() bool {
+	return pd.dp.IsPartial
 }

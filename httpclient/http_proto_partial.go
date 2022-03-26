@@ -25,6 +25,7 @@ func CreatePartialDownloader(url string, file *iotools.SafeFile, from int64, pos
 	pd.dp.From = from
 	pd.dp.To = to
 	pd.dp.Pos = pos
+	pd.dp.IsPartial = true
 	return &pd
 }
 
@@ -131,4 +132,8 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 
 func (pd *PartialDownloader) DoWork() (bool, error) {
 	return pd.DownloadSergment()
+}
+
+func (pd *PartialDownloader) IsPartialDownload() bool {
+	return pd.dp.IsPartial
 }

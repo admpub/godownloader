@@ -61,4 +61,5 @@ type DownloadProgress struct {
 	BytesInSecond int64
 	Speed         int64
 	Lsmt          time.Time
+	IsPartial     bool
 }
