@@ -70,22 +70,26 @@ func (mw *MonitoredWorker) wgoroute() {
 	done := make(chan error)
 	go func() {
 		isdone, err := mw.Itw.DoWork()
+		defer func() {
+			done <- err
+			close(done)
+		}()
 		if err != nil {
 			log.Println("error: guid", mw.guid, " work failed", err)
 			mw.state = Failed
-			done <- err
-			close(done)
 			return
 		}
 		if isdone {
 			if mw.ondone != nil {
-				mw.ondone(mw.ctx)
+				err = mw.ondone(mw.ctx)
+				if err != nil {
+					log.Println("ondone:", err)
+					return
+				}
 			}
 			mw.state = Completed
 			log.Println("info: work done")
 		}
-		done <- err
-		close(done)
 	}()
 
 	for {
