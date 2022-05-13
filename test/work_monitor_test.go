@@ -38,6 +38,10 @@ func (tw *TestWork) AfterStop() error {
 	return nil
 }
 
+func (tw *TestWork) IsPartialDownload() bool {
+	return true
+}
+
 func TestWorker(t *testing.T) {
 	tes := new(monitor.MonitoredWorker)
 	itw := &TestWork{From: 1, To: 8, sleep: 300}

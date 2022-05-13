@@ -42,6 +42,11 @@ func (tw *TestWorkPool) DoWork() (bool, error) {
 	}
 	return false, nil
 }
+
+func (tw *TestWorkPool) IsPartialDownload() bool {
+	return true
+}
+
 func TestWorkerPool(t *testing.T) {
 	wp := monitor.WorkerPool{}
 	for i := 0; i < 20; i++ {
