@@ -71,3 +71,8 @@ func (pd *DefaultDownloader) DoWork(ctx context.Context) (bool, error) {
 func (pd *DefaultDownloader) IsPartialDownload() bool {
 	return pd.dp.IsPartial
 }
+
+func (pd *DefaultDownloader) ResetProgress() {
+	pd.dp.Pos = pd.dp.From
+	pd.dp.Speed = 0
+}

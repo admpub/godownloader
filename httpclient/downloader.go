@@ -46,7 +46,10 @@ func (dl *Downloader) StopAll() []error {
 
 func (dl *Downloader) StartAll() []error {
 	if err := dl.sf.ReOpen(); err != nil {
-		return []error{err}
+		if !os.IsNotExist(err) {
+			return []error{err}
+		}
+		dl.wp.ResetAllProgress()
 	}
 	return dl.wp.StartAll()
 }
@@ -118,10 +121,12 @@ func CreateDownloader(url string, fp string, seg int64, getDown func() string, p
 func RestoreDownloader(url string, fp string, dp []DownloadProgress, getDown func() string, pipeNames ...string) (dl *Downloader, err error) {
 	dfs := getDown() + fp
 	var sf *iotools.SafeFile
+	var isNew bool
 	if fi, _err := os.Stat(dfs); _err == nil && !fi.IsDir() {
 		sf, err = iotools.OpenSafeFile(dfs)
 	} else {
 		sf, err = iotools.CreateSafeFile(dfs)
+		isNew = true
 	}
 	if err != nil {
 		return nil, fmt.Errorf(`%v: %w`, dfs, err)
@@ -135,6 +140,10 @@ func RestoreDownloader(url string, fp string, dp []DownloadProgress, getDown fun
 	for _, r := range dp {
 		var dow monitor.DiscretWork
 		if r.IsPartial {
+			if isNew && r.Pos > r.From {
+				r.Pos = r.From
+				r.Speed = 0
+			}
 			dow = CreatePartialDownloader(url, sf, r.From, r.Pos, r.To)
 		} else {
 			dow = CreateDefaultDownloader(url, sf)

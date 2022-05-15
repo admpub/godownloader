@@ -138,3 +138,8 @@ func (pd *PartialDownloader) DoWork(ctx context.Context) (bool, error) {
 func (pd *PartialDownloader) IsPartialDownload() bool {
 	return pd.dp.IsPartial
 }
+
+func (pd *PartialDownloader) ResetProgress() {
+	pd.dp.Pos = pd.dp.From
+	pd.dp.Speed = 0
+}

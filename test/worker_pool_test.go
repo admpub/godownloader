@@ -30,6 +30,10 @@ func (tw *TestWorkPool) AfterStop() error {
 	return nil
 }
 
+func (tw *TestWorkPool) ResetProgress() {
+	tw.From = 0
+}
+
 func (tw *TestWorkPool) DoWork(context.Context) (bool, error) {
 	time.Sleep(time.Millisecond * 300)
 	tw.From += 1

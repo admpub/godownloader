@@ -55,11 +55,11 @@ func GetSize(urls string) (int64, error) {
 }
 
 type DownloadProgress struct {
-	From          int64 `json:"From"`
-	To            int64 `json:"To"`
-	Pos           int64 `json:"Pos"`
+	From          int64 // 分片起始字节位置
+	To            int64 // 分片终止字节位置
+	Pos           int64 // 已下载占整个文件的位置 From<=Pos<=To
 	BytesInSecond int64
 	Speed         int64
 	Lsmt          time.Time
-	IsPartial     bool
+	IsPartial     bool // 是否分片下载
 }

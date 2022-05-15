@@ -40,6 +40,7 @@ type DiscretWork interface {
 	BeforeRun() error
 	AfterStop() error
 	IsPartialDownload() bool
+	ResetProgress()
 }
 
 func genUid() string {
@@ -182,4 +183,8 @@ func (mw *MonitoredWorker) Stop(ctx context.Context) error {
 
 func (mw *MonitoredWorker) GetProgress() interface{} {
 	return mw.Itw.GetProgress()
+}
+
+func (mw *MonitoredWorker) ResetProgress() {
+	mw.Itw.ResetProgress()
 }

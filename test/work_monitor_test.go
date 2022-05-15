@@ -44,6 +44,10 @@ func (tw *TestWork) IsPartialDownload() bool {
 	return true
 }
 
+func (tw *TestWork) ResetProgress() {
+	tw.From = 0
+}
+
 func TestWorker(t *testing.T) {
 	tes := new(monitor.MonitoredWorker)
 	itw := &TestWork{From: 0, To: 8, sleep: 300}

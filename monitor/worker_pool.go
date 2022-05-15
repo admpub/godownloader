@@ -99,6 +99,12 @@ func (wp *WorkerPool) GetAllProgress() interface{} {
 	return pr
 }
 
+func (wp *WorkerPool) ResetAllProgress() {
+	for _, value := range wp.workers {
+		value.ResetProgress()
+	}
+}
+
 func (wp *WorkerPool) State() State {
 	return wp.state
 }
