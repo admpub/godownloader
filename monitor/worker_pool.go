@@ -105,6 +105,7 @@ func (wp *WorkerPool) ResetAllProgress() {
 	for _, value := range wp.workers {
 		value.ResetProgress()
 	}
+	atomic.StoreInt32(&wp.done, 0)
 }
 
 func (wp *WorkerPool) State() State {
