@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"sync/atomic"
+	"time"
 )
 
 var States = map[State]string{
@@ -56,6 +58,7 @@ type MonitoredWorker struct {
 	ondone     func(context.Context) error
 	ctx        context.Context
 	cancelFunc context.CancelFunc
+	id         atomic.Value
 }
 
 func (mw *MonitoredWorker) setState(state State) {
@@ -64,7 +67,7 @@ func (mw *MonitoredWorker) setState(state State) {
 	mw.stateLock.Unlock()
 }
 
-func (mw *MonitoredWorker) doWorkExec(ctx context.Context) (bool, error) {
+func (mw *MonitoredWorker) doWorkExec(ctx context.Context, id interface{}) (bool, error) {
 	isdone, err := mw.Itw.DoWork(ctx)
 	if err != nil {
 		log.Println("error: guid", mw.guid, "work failed", err)
@@ -79,20 +82,22 @@ func (mw *MonitoredWorker) doWorkExec(ctx context.Context) (bool, error) {
 		log.Println("info: work done")
 		return isdone, err
 	}
-	return mw.doWorkExec(ctx)
+	if mw.id.Load() != id {
+		return false, nil
+	}
+	return mw.doWorkExec(ctx, id)
 }
 
 func (mw *MonitoredWorker) wgoroute() {
 	log.Println("info: work start", mw.GetId())
-
+	id := mw.id.Load()
 	defer func() {
-		//log.Println("info: release work guid", mw.GetId())
 		mw.wgrun.Done()
 	}()
 
 	done := make(chan struct{})
 	go func() {
-		mw.doWorkExec(mw.ctx)
+		mw.doWorkExec(mw.ctx, id)
 		done <- struct{}{}
 		close(done)
 	}()
@@ -100,11 +105,11 @@ func (mw *MonitoredWorker) wgoroute() {
 	for {
 		select {
 		case <-mw.ctx.Done():
-			log.Println("info: stopped work guid", mw.GetId())
+			log.Println("info: stop work guid", mw.GetId())
 			return
 		case <-done:
 			mw.cancelFunc()
-			log.Println("info: done work guid", mw.GetId())
+			log.Println("info: release work guid", mw.GetId())
 			return
 		}
 	}
@@ -152,6 +157,7 @@ func (mw *MonitoredWorker) Start(ctx context.Context) error {
 	mw.ctx, mw.cancelFunc = context.WithCancel(ctx)
 	mw.setState(Running)
 	mw.wgrun.Add(1)
+	mw.id.Store(time.Now().Format(`20060102150405.000000`))
 	go mw.wgoroute()
 
 	return nil
@@ -164,6 +170,7 @@ func (mw *MonitoredWorker) Stop(ctx context.Context) error {
 		return ErrStopNonRunningJob
 	}
 	mw.cancelFunc()
+	mw.id.Store(``)
 	mw.wgrun.Wait()
 	mw.setState(Stopped)
 	log.Println("info: work stopped")
