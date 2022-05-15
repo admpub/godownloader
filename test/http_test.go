@@ -42,9 +42,9 @@ func TestPartDownload(t *testing.T) {
 	f, _ := iotools.CreateSafeFile("part_download.data")
 	defer f.Close()
 	f.Truncate(c)
-	dow := httpclient.CreatePartialDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, 0, c)
-	dow.BeforeRun()
 	ctx := context.Background()
+	dow := httpclient.CreatePartialDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, 0, c)
+	dow.BeforeRun(ctx)
 	for {
 		sta, _ := dow.DoWork(ctx)
 		if sta {

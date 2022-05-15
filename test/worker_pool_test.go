@@ -22,7 +22,7 @@ func (tw TestWorkPool) GetProgress() model.DownloadProgress {
 
 }
 
-func (tw *TestWorkPool) BeforeRun() error {
+func (tw *TestWorkPool) BeforeRun(context.Context) error {
 	log.Println("info: exec before run")
 	return nil
 }

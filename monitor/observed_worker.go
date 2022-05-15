@@ -39,7 +39,7 @@ const (
 type DiscretWork interface {
 	DoWork(context.Context) (bool, error)
 	GetProgress() model.DownloadProgress
-	BeforeRun() error
+	BeforeRun(context.Context) error
 	AfterStop() error
 	IsPartialDownload() bool
 	ResetProgress()
@@ -155,11 +155,12 @@ func (mw *MonitoredWorker) Start(ctx context.Context) error {
 			return ErrRunCompletedJob
 		}
 	}
-	if err := mw.Itw.BeforeRun(); err != nil {
+	mw.ctx, mw.cancelFunc = context.WithCancel(ctx)
+	if err := mw.Itw.BeforeRun(mw.ctx); err != nil {
 		mw.setState(Failed)
+		mw.cancelFunc()
 		return err
 	}
-	mw.ctx, mw.cancelFunc = context.WithCancel(ctx)
 	mw.setState(Running)
 	mw.wgrun.Add(1)
 	mw.id.Store(time.Now().Format(`20060102150405.000000`))

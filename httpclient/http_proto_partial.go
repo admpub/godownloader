@@ -36,7 +36,7 @@ func (pd PartialDownloader) GetProgress() model.DownloadProgress {
 	return *pd.dp
 }
 
-func (pd *PartialDownloader) BeforeDownload() error {
+func (pd *PartialDownloader) BeforeDownload(ctx context.Context) error {
 	if pd.dp.Pos >= pd.dp.To {
 		if pd.req != nil {
 			pd.req = nil
@@ -44,7 +44,7 @@ func (pd *PartialDownloader) BeforeDownload() error {
 		return nil
 	}
 	//create new req
-	r, err := http.NewRequest("GET", pd.url, nil)
+	r, err := http.NewRequestWithContext(ctx, "GET", pd.url, nil)
 	if err != nil {
 		return err
 	}
@@ -69,8 +69,8 @@ func (pd *PartialDownloader) AfterStopDownload() error {
 	return pd.close()
 }
 
-func (pd *PartialDownloader) BeforeRun() error {
-	return pd.BeforeDownload()
+func (pd *PartialDownloader) BeforeRun(ctx context.Context) error {
+	return pd.BeforeDownload(ctx)
 }
 
 func (pd *PartialDownloader) AfterStop() error {

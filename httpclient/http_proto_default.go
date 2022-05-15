@@ -34,7 +34,7 @@ func (pd DefaultDownloader) GetProgress() model.DownloadProgress {
 	return *pd.dp
 }
 
-func (pd *DefaultDownloader) BeforeRun() error {
+func (pd *DefaultDownloader) BeforeRun(context.Context) error {
 	return nil
 }
 

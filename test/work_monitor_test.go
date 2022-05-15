@@ -32,7 +32,7 @@ func (tw *TestWork) DoWork(context.Context) (bool, error) {
 	return false, nil
 }
 
-func (tw *TestWork) BeforeRun() error {
+func (tw *TestWork) BeforeRun(context.Context) error {
 	log.Println("info: exec before run")
 	return nil
 }
