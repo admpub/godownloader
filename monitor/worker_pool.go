@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"sync/atomic"
+
+	"github.com/admpub/godownloader/model"
 )
 
 func NewWorkerPool() *WorkerPool {
@@ -91,8 +93,8 @@ func (wp *WorkerPool) initContext() {
 	}
 }
 
-func (wp *WorkerPool) GetAllProgress() interface{} {
-	var pr []interface{}
+func (wp *WorkerPool) GetAllProgress() []model.DownloadProgress {
+	var pr []model.DownloadProgress
 	for _, value := range wp.workers {
 		pr = append(pr, value.GetProgress())
 	}

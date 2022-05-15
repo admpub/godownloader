@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/admpub/godownloader/model"
 	"github.com/admpub/godownloader/monitor"
 )
 
@@ -16,8 +17,8 @@ type TestWorkPool struct {
 	From, id, To int32
 }
 
-func (tw TestWorkPool) GetProgress() interface{} {
-	return tw.From
+func (tw TestWorkPool) GetProgress() model.DownloadProgress {
+	return model.DownloadProgress{From: int64(tw.From)}
 
 }
 

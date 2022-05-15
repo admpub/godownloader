@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/admpub/godownloader/model"
 	"github.com/admpub/godownloader/monitor"
 )
 
@@ -14,8 +15,8 @@ type TestWork struct {
 	From, sleep, To int
 }
 
-func (tw TestWork) GetProgress() interface{} {
-	return tw.From
+func (tw TestWork) GetProgress() model.DownloadProgress {
+	return model.DownloadProgress{From: int64(tw.From)}
 }
 func (tw *TestWork) DoWork(context.Context) (bool, error) {
 	time.Sleep(time.Millisecond * 300)

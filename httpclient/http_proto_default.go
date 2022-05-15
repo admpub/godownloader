@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/model"
 )
 
 type DefaultDownloader struct {
-	dp     DownloadProgress
+	dp     model.DownloadProgress
 	client http.Client
 	url    string
 	file   *iotools.SafeFile
@@ -28,7 +29,7 @@ func CreateDefaultDownloader(url string, file *iotools.SafeFile) *DefaultDownloa
 	return &pd
 }
 
-func (pd DefaultDownloader) GetProgress() interface{} {
+func (pd DefaultDownloader) GetProgress() model.DownloadProgress {
 	return pd.dp
 }
 

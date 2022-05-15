@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/admpub/godownloader/iotools"
+	"github.com/admpub/godownloader/model"
 )
 
 type PartialDownloader struct {
-	dp     DownloadProgress
+	dp     model.DownloadProgress
 	client http.Client
 	req    *http.Response
 	url    string
@@ -30,7 +31,7 @@ func CreatePartialDownloader(url string, file *iotools.SafeFile, from int64, pos
 	return &pd
 }
 
-func (pd PartialDownloader) GetProgress() interface{} {
+func (pd PartialDownloader) GetProgress() model.DownloadProgress {
 	return pd.dp
 }
 

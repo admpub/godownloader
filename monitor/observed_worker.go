@@ -8,6 +8,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/admpub/godownloader/model"
 )
 
 var States = map[State]string{
@@ -36,7 +38,7 @@ const (
 
 type DiscretWork interface {
 	DoWork(context.Context) (bool, error)
-	GetProgress() interface{}
+	GetProgress() model.DownloadProgress
 	BeforeRun() error
 	AfterStop() error
 	IsPartialDownload() bool
@@ -149,7 +151,9 @@ func (mw *MonitoredWorker) Start(ctx context.Context) error {
 	case Running:
 		return ErrRunRunningJob
 	case Completed:
-		return ErrRunCompletedJob
+		if mw.GetProgress().IsCompleted() {
+			return ErrRunCompletedJob
+		}
 	}
 	if err := mw.Itw.BeforeRun(); err != nil {
 		mw.setState(Failed)
@@ -181,7 +185,7 @@ func (mw *MonitoredWorker) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (mw *MonitoredWorker) GetProgress() interface{} {
+func (mw *MonitoredWorker) GetProgress() model.DownloadProgress {
 	return mw.Itw.GetProgress()
 }
 
