@@ -211,7 +211,11 @@ func (srv *DServ) startTask(ctx echo.Context) error {
 		}
 
 		if errs := srv.dls[ind].StartAll(); len(errs) > 0 {
-			return ctx.JSON(data.SetError(errors.New("error: can't start all part")))
+			_errs := make([]string, len(errs))
+			for k, v := range errs {
+				_errs[k] = v.Error()
+			}
+			return ctx.JSON(data.SetError(errors.New("error: can't start all part: " + strings.Join(_errs, "\n"))))
 		}
 	}
 	return ctx.JSON(data)
