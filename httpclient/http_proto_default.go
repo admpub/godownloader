@@ -11,12 +11,10 @@ import (
 )
 
 type DefaultDownloader struct {
-	dp         DownloadProgress
-	client     http.Client
-	url        string
-	file       *iotools.SafeFile
-	context    context.Context
-	cancelFunc context.CancelFunc
+	dp     DownloadProgress
+	client http.Client
+	url    string
+	file   *iotools.SafeFile
 }
 
 func CreateDefaultDownloader(url string, file *iotools.SafeFile) *DefaultDownloader {
@@ -35,19 +33,17 @@ func (pd DefaultDownloader) GetProgress() interface{} {
 }
 
 func (pd *DefaultDownloader) BeforeRun() error {
-	pd.context, pd.cancelFunc = context.WithCancel(context.Background())
 	return nil
 }
 
 func (pd *DefaultDownloader) AfterStop() error {
-	pd.cancelFunc()
 	return nil
 }
 
-func (pd *DefaultDownloader) DoWork() (bool, error) {
+func (pd *DefaultDownloader) DoWork(ctx context.Context) (bool, error) {
 	start := time.Now()
 	//create new req
-	r, err := http.NewRequestWithContext(pd.context, "GET", pd.url, nil)
+	r, err := http.NewRequestWithContext(ctx, "GET", pd.url, nil)
 	if err != nil {
 		return false, err
 	}

@@ -1,6 +1,7 @@
 package dtest
 
 import (
+	"context"
 	"log"
 	"testing"
 	"time"
@@ -11,7 +12,6 @@ import (
 )
 
 func TestPartDownloadWorker(t *testing.T) {
-	return
 	url := "http://releases.ubuntu.com/14.04.2/ubuntu-14.04.2-server-amd64.list"
 	c, _ := httpclient.GetSize(url)
 	c = c / 2
@@ -20,15 +20,16 @@ func TestPartDownloadWorker(t *testing.T) {
 	log.Println(f.Truncate(c))
 	dow := httpclient.CreatePartialDownloader(url, f, 0, 0, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
-	log.Println(mv.Start())
-	log.Println(mv.Start())
+	ctx := context.Background()
+	log.Println(mv.Start(ctx))
+	log.Println(mv.Start(ctx))
 	time.Sleep(time.Second * 1)
-	log.Println(mv.Stop())
+	log.Println(mv.Stop(ctx))
 	time.Sleep(time.Second * 5)
-	log.Println(mv.Start())
-	log.Println(mv.Start())
+	log.Println(mv.Start(ctx))
+	log.Println(mv.Start(ctx))
 	time.Sleep(time.Second * 5)
-	log.Println(mv.Stop())
+	log.Println(mv.Stop(ctx))
 }
 
 func TestMultiPartDownloadWorker(t *testing.T) {
@@ -40,16 +41,17 @@ func TestMultiPartDownloadWorker(t *testing.T) {
 	defer f.Close()
 	f.Truncate(c)
 	ps := c / pc
+	ctx := context.Background()
 	for i := int64(0); i < pc-1; i++ {
 		//log.Println(ps*i, ps*i+ps)
 		d := httpclient.CreatePartialDownloader(url, f, ps*i, ps*i, ps*i+ps)
 		mv := monitor.MonitoredWorker{Itw: d}
-		mv.Start()
+		mv.Start(ctx)
 	}
 	lastseg := c - (ps * (pc - 1))
 	dow := httpclient.CreatePartialDownloader(url, f, lastseg, lastseg, c)
 	mv := monitor.MonitoredWorker{Itw: dow}
-	mv.Start()
+	mv.Start(ctx)
 
 	time.Sleep(time.Second * 15)
 

@@ -1,6 +1,7 @@
 package dtest
 
 import (
+	"context"
 	"testing"
 
 	"github.com/admpub/godownloader/httpclient"
@@ -43,8 +44,9 @@ func TestPartDownload(t *testing.T) {
 	f.Truncate(c)
 	dow := httpclient.CreatePartialDownloader("http://ports.ubuntu.com/dists/precise/main/installer-powerpc/current/images/powerpc/netboot/mini.iso", f, 0, 0, c)
 	dow.BeforeRun()
+	ctx := context.Background()
 	for {
-		sta, _ := dow.DoWork()
+		sta, _ := dow.DoWork(ctx)
 		if sta {
 			return
 		}

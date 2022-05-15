@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -94,7 +95,7 @@ func (pd *PartialDownloader) close() (err error) {
 	return
 }
 
-func (pd *PartialDownloader) DownloadSergment() (bool, error) {
+func (pd *PartialDownloader) DownloadSergment(ctx context.Context) (bool, error) {
 	if pd.req != nil {
 		//write flush data to disk
 		buffer := make([]byte, FlushDiskSize)
@@ -130,8 +131,8 @@ func (pd *PartialDownloader) DownloadSergment() (bool, error) {
 	return false, nil
 }
 
-func (pd *PartialDownloader) DoWork() (bool, error) {
-	return pd.DownloadSergment()
+func (pd *PartialDownloader) DoWork(ctx context.Context) (bool, error) {
+	return pd.DownloadSergment(ctx)
 }
 
 func (pd *PartialDownloader) IsPartialDownload() bool {

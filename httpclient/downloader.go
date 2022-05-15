@@ -86,7 +86,7 @@ func CreateDownloader(url string, fp string, seg int64, getDown func() string, p
 			return nil, err
 		}
 	}
-	wp := new(monitor.WorkerPool)
+	wp := monitor.NewWorkerPool()
 	var dow monitor.DiscretWork
 	if support {
 		//create part-downloader foreach segment

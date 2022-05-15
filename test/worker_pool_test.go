@@ -1,6 +1,7 @@
 package dtest
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -29,7 +30,7 @@ func (tw *TestWorkPool) AfterStop() error {
 	return nil
 }
 
-func (tw *TestWorkPool) DoWork() (bool, error) {
+func (tw *TestWorkPool) DoWork(context.Context) (bool, error) {
 	time.Sleep(time.Millisecond * 300)
 	tw.From += 1
 	log.Print(tw.From)
