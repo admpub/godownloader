@@ -13,7 +13,7 @@ import (
 )
 
 type PartialDownloader struct {
-	dp     model.DownloadProgress
+	dp     *model.DownloadProgress
 	client http.Client
 	req    *http.Response
 	url    string
@@ -24,6 +24,7 @@ func CreatePartialDownloader(url string, file *iotools.SafeFile, from int64, pos
 	var pd PartialDownloader
 	pd.file = file
 	pd.url = url
+	pd.dp = &model.DownloadProgress{}
 	pd.dp.From = from
 	pd.dp.To = to
 	pd.dp.Pos = pos
@@ -32,7 +33,7 @@ func CreatePartialDownloader(url string, file *iotools.SafeFile, from int64, pos
 }
 
 func (pd PartialDownloader) GetProgress() model.DownloadProgress {
-	return pd.dp
+	return *pd.dp
 }
 
 func (pd *PartialDownloader) BeforeDownload() error {
@@ -141,6 +142,5 @@ func (pd *PartialDownloader) IsPartialDownload() bool {
 }
 
 func (pd *PartialDownloader) ResetProgress() {
-	pd.dp.Pos = pd.dp.From
-	pd.dp.Speed = 0
+	pd.dp.ResetProgress()
 }

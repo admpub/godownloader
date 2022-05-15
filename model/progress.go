@@ -15,3 +15,8 @@ type DownloadProgress struct {
 func (dp DownloadProgress) IsCompleted() bool {
 	return dp.Pos >= dp.To
 }
+
+func (dp *DownloadProgress) ResetProgress() {
+	dp.Pos = dp.From
+	dp.Speed = 0
+}

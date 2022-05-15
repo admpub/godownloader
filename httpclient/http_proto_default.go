@@ -12,7 +12,7 @@ import (
 )
 
 type DefaultDownloader struct {
-	dp     model.DownloadProgress
+	dp     *model.DownloadProgress
 	client http.Client
 	url    string
 	file   *iotools.SafeFile
@@ -22,6 +22,7 @@ func CreateDefaultDownloader(url string, file *iotools.SafeFile) *DefaultDownloa
 	var pd DefaultDownloader
 	pd.file = file
 	pd.url = url
+	pd.dp = &model.DownloadProgress{}
 	pd.dp.From = 0
 	pd.dp.To = 1
 	pd.dp.Pos = 0
@@ -30,7 +31,7 @@ func CreateDefaultDownloader(url string, file *iotools.SafeFile) *DefaultDownloa
 }
 
 func (pd DefaultDownloader) GetProgress() model.DownloadProgress {
-	return pd.dp
+	return *pd.dp
 }
 
 func (pd *DefaultDownloader) BeforeRun() error {
@@ -74,6 +75,5 @@ func (pd *DefaultDownloader) IsPartialDownload() bool {
 }
 
 func (pd *DefaultDownloader) ResetProgress() {
-	pd.dp.Pos = pd.dp.From
-	pd.dp.Speed = 0
+	pd.dp.ResetProgress()
 }
