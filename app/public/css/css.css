@@ -734,7 +734,7 @@ white-space: nowrap;
 background-color: #f9f2f4;
 border-radius: 4px
 }
-
+.nowrap{white-space: nowrap;}
 pre {
 display: block;
 padding: 10px;

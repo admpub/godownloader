@@ -10,6 +10,7 @@ import (
 
 	"github.com/admpub/godownloader/service"
 	loga "github.com/admpub/log"
+	"github.com/webx-top/echo"
 	"github.com/webx-top/echo/defaults"
 	"github.com/webx-top/echo/engine/standard"
 	mw "github.com/webx-top/echo/middleware"
@@ -93,6 +94,7 @@ func main() {
 			return langConf.AllList
 		},
 	}))
+	defaults.SetRenderDataWrapper(echo.DefaultRenderDataWrapper)
 	defaults.Use(language.New(langConf).Middleware())
 	gdownsrv.Register(defaults.Default, true)
 	defaults.Run(standard.New(host + ":" + strconv.Itoa(port)))

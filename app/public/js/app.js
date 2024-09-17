@@ -174,7 +174,8 @@ function AddDownload() {
     var req = {
         PartCount: parseInt($("#part_count_id").val()),
         FilePath: $("#save_path_id").val(),
-        Url: $("#url_id").val()
+        Url: $("#url_id").val(),
+        Download: $("#dlopt-download-now").prop('checked')
     };
     req.Pipes=[];
     $('#select-option-pipes input[name="pipes[]"]:checked').each(function(){
@@ -189,8 +190,14 @@ function checkedIds(){
     });
     return ids;
 }
+function uncheckedIds(){
+    var t=$('#fileTable');
+    t.find('.idCheck:checked').prop('checked',false);
+    t.find('.allCheck:checked').prop('checked',false);
+}
 function RemoveDownload() {
     var req = {id:checkedIds()};
+    if(req.id.length<1) return alert('请选择要删除的下载任务');
     reqForm("/remove_task",req,function(){
         for(var i=0;i<req.id.length;i++){
             $('#id-'+req.id[i]).parent('tr').remove();
@@ -199,11 +206,18 @@ function RemoveDownload() {
 }
 function StartDownload() {
     var req = {id:checkedIds()};
-    reqForm("/start_task",req);
+    if(req.id.length<1) return alert('请选择要开始的下载任务');
+    reqForm("/start_task",req,uncheckedIds);
+}
+function RestartDownload() {
+    var req = {id:checkedIds()};
+    if(req.id.length<1) return alert('请选择要操作的下载任务');
+    reqForm("/restart_task",req,uncheckedIds);
 }
 function StopDownload() {
     var req = {id:checkedIds()};
-    reqForm("/stop_task",req);
+    if(req.id.length<1) return alert('请选择要停止的下载任务');
+    reqForm("/stop_task",req,uncheckedIds);
 }
 function StartAllDownload() {
     reqJSON("/start_all_task");
