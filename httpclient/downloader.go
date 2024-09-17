@@ -126,12 +126,13 @@ func RestoreDownloader(url string, fp string, dp []model.DownloadProgress, getDo
 		return nil, fmt.Errorf(`%v: %w`, dfs, err)
 	}
 	wp := new(monitor.WorkerPool)
-	for _, r := range dp {
+	for i, r := range dp {
 		var dow monitor.DiscretWork
 		if r.IsPartial {
 			if isNew && r.Pos > r.From {
 				r.Pos = r.From
 				r.Speed = 0
+				dp[i] = r
 			}
 			dow = CreatePartialDownloader(url, sf, r.From, r.Pos, r.To)
 		} else {
