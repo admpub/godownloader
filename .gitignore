@@ -33,3 +33,6 @@ _testmain.go
 go.mod
 go.sum
 tower-app-*
+/test/*.list
+/test/*.data
+/test/*.xz

@@ -48,6 +48,15 @@ func (dl *Downloader) StartAll() []error {
 	return dl.wp.StartAll()
 }
 
+func (dl *Downloader) RestartAll() []error {
+	if err := dl.sf.ReOpen(); err != nil {
+		if !os.IsNotExist(err) {
+			return []error{err}
+		}
+	}
+	return dl.wp.RestartAll()
+}
+
 func (dl *Downloader) GetProgress() []model.DownloadProgress {
 	return dl.wp.GetAllProgress()
 }

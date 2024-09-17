@@ -169,6 +169,29 @@ func (mw *MonitoredWorker) Start(ctx context.Context) error {
 	return nil
 }
 
+func (mw *MonitoredWorker) Restart(ctx context.Context) error {
+	mw.lc.Lock()
+	defer mw.lc.Unlock()
+	switch mw.GetState() {
+	case Running:
+		mw.Stop(ctx)
+	case Completed:
+		mw.ResetProgress()
+	}
+	mw.ctx, mw.cancelFunc = context.WithCancel(ctx)
+	if err := mw.Itw.BeforeRun(mw.ctx); err != nil {
+		mw.setState(Failed)
+		mw.cancelFunc()
+		return err
+	}
+	mw.setState(Running)
+	mw.wgrun.Add(1)
+	mw.id.Store(time.Now().Format(`20060102150405.000000`))
+	go mw.wgoroute()
+
+	return nil
+}
+
 func (mw *MonitoredWorker) Stop(ctx context.Context) error {
 	mw.lc.Lock()
 	defer mw.lc.Unlock()

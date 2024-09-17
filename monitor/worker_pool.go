@@ -57,6 +57,22 @@ func (wp *WorkerPool) Completed() bool {
 	return atomic.LoadInt32(&wp.total) == atomic.LoadInt32(&wp.done)
 }
 
+func (wp *WorkerPool) RestartAll() []error {
+	if wp.state == Running {
+		return nil
+	}
+	wp.ResetAllProgress()
+	wp.initContext()
+	var errs []error
+	for _, value := range wp.workers {
+		if err := value.Restart(wp.ctx); err != nil && err != ErrRunRunningJob {
+			errs = append(errs, err)
+		}
+	}
+	wp.state = Running
+	return errs
+}
+
 func (wp *WorkerPool) StartAll() []error {
 	if wp.state == Running {
 		return nil

@@ -65,6 +65,7 @@ type NewJob struct {
 	PartCount int64
 	FilePath  string
 	Pipes     []string
+	Download  bool
 }
 
 type DServ struct {
@@ -113,6 +114,7 @@ func (srv *DServ) Register(r echo.RouteRegister, enableSockJS bool) {
 	r.Route("GET,POST", "/add_task", srv.addTask)
 	r.Route("GET,POST", "/remove_task", srv.removeTask)
 	r.Route("GET,POST", "/start_task", srv.startTask)
+	r.Route("GET,POST", "/restart_task", srv.restartTask)
 	r.Route("GET,POST", "/stop_task", srv.stopTask)
 	r.Route("GET,POST", "/start_all_task", srv.startAllTask)
 	r.Route("GET,POST", "/stop_all_task", srv.stopAllTask)
@@ -197,6 +199,15 @@ func (srv *DServ) addTask(ctx echo.Context) error {
 	}
 	srv.dls = append(srv.dls, dl)
 	srv.SaveSettings()
+	if nj.Download {
+		if errs := dl.StartAll(); len(errs) > 0 {
+			_errs := make([]string, len(errs))
+			for k, v := range errs {
+				_errs[k] = v.Error()
+			}
+			return ctx.JSON(data.SetError(errors.New("error: can't start all part: " + strings.Join(_errs, "\n"))))
+		}
+	}
 	return ctx.JSON(data)
 }
 
@@ -216,6 +227,27 @@ func (srv *DServ) startTask(ctx echo.Context) error {
 				_errs[k] = v.Error()
 			}
 			return ctx.JSON(data.SetError(errors.New("error: can't start all part: " + strings.Join(_errs, "\n"))))
+		}
+	}
+	return ctx.JSON(data)
+}
+
+func (srv *DServ) restartTask(ctx echo.Context) error {
+	srv.oplock.Lock()
+	defer srv.oplock.Unlock()
+	data := ctx.Data()
+	for _, id := range ctx.FormValues(`id[]`) {
+		ind := ctx.Atop(id).Int()
+		if !(len(srv.dls) > ind) {
+			return ctx.JSON(data.SetError(errors.New("error: id is out of jobs list")))
+		}
+
+		if errs := srv.dls[ind].RestartAll(); len(errs) > 0 {
+			_errs := make([]string, len(errs))
+			for k, v := range errs {
+				_errs[k] = v.Error()
+			}
+			return ctx.JSON(data.SetError(errors.New("error: can't restart all part: " + strings.Join(_errs, "\n"))))
 		}
 	}
 	return ctx.JSON(data)
